@@ -10,22 +10,25 @@
       - "\alpha is a small positive fraction called the \textit{step-size parameter}, which influences the rate of learning"
     - "It is a striking feature of the reinforcement learning solution that it can achieve the effects of planning and lookahead without using a model of the opponent and without conducting an explicit search over possible sequences of future states and actions" [11]{SuttonBarto2018}
 
-
-
   [COMPONENTS OF RL]
 
     [STATE/ENVIRONMENT]
       - RL "relies heavily on the concept of state---as input to the policy and value function, and as both input to and output from the model" [7]{SuttonBarto2018}
       - "we can think of the state as a signal conveying to the agent some sense of 'how the environment is' at a particular time" [7]{SuttonBarto2018}
+      - environment: will generate the observations (states) and rewards each time step, based on the current state of the MDP (Markov Decision Process) (RLPA)
 
     [AGENT]
       - "All reinforcement learning agents have explicit goals, can sense aspects of their environments, and can choose actions to influence their environments" [3]{SuttonBarto2018}
+      - will try to maximize the cumulative reward it receives from the environment by executing actions each time step, thus infliencing the MDP's state (RLPA)
+      - the only way we have to control the environment is through the agent's actions (RLPA)
 
     [POLICY]
       - "defines the learning agent's way of behaving at a given time" [6]{SuttonBarto2018}
       - "a mapping from perceived states of the environment to actions to be taken when in those states" [6]{SuttonBarto2018}
       - "In some cases the policy may be a simple function or lookup table, whereas in others it may involve extensive computation such as a search process" [6]{SuttonBarto2018}
       - "policies may be stochastic, specifying probabilities for each action" [6]{SuttonBarto2018}
+      - a policy network is trained using neural networks to maximise the expected reward (RLPA)
+        - e.g.: an LSTM represents the history of the path taken by the agent, and a FFNN takes this history and the current state and gives maybe a probability distribution over all possible actions, and then the softmax of this is taken to select the action to take? maybe?
 
     [REWARD SIGNAL]
       - "defines the goal of a reinforcement learning problem" [6]{SuttonBarto2018}
@@ -33,6 +36,10 @@
       - short-term, for the immediate time step
       - "the primary basis for altering the policy; if an action selected by the policy is followed by low reward, then the policy may be changed to select some other action in that situation in the future" [6]{SuttonBarto2018}
       - "may be stochastic functions of the state of the environment and the actions taken" [6]{SuttonBarto2018}
+      - an example of a reward is an agent receiving an award of 1 if it reaches the correct answer entity as the terminal state, and 0 otherwise (RLPA)
+        - appropriate if we could assume that there is always an answer entity that is reachable within a finite number of steps, but this is not always the case (e.g. in the QA paper Rodrigo discusses)
+      - another example, used in RLPA's reviewed paper: give the agent an option not to answer (by including in the graph a no-answer relation and node from every existing node), and then have a positive reward if answered correctly, negative if answered incorrectly, and 0 reward if not answered
+
 
     [VALUE FUNCTION]
       - "Whereas the reward signal indicates what is good in an immediate sense, a \textit{value function} specifies what is good in the long run" [6]{SuttonBarto2018}
@@ -48,3 +55,24 @@
       - "Methods for solving reinforcement learning problems that use models and planning are called \textit{model-based} methods, as opposed to simpler \textit{model-free} methods that are explicitly trial-and-error learners---viewed as almost the \textit{opposite} of planning" [7]{SuttonBarto2018}
       - which makes sense for us? which one are we going to use?
       - "Because models have to be reasonably accurate to be useful, model-free methods can have advantages over more complex methods when the real bottleneck in solving a problem is the difficulty of constructing a sufficiently accurate environment model" [12]{SuttonBarto2018}
+
+  [KNOWLEDGE REPRESENTATION]
+    - graph theory is a powerful knowledge representation framework (RLPA)
+    - graphs have been used as environments for RL agents: it is intuitively easy to imagine the agent taking steps from node to node via the existing edges (RLPA)
+    - when using a knowledge graph for question answering, the first step is to parse the input question into a constituent question entity and relation, e.g. mapping "What is the capital of France?" to \langle France, capital of \rangle (RLPA)
+    - (RLPA) KG formally defined by \langle G, E, R, L \rangle, such that
+      - G is the knowledge graph itself, the structure containing all the other elements
+      - E is the set of entities (parsing the input question will return the question entity e_q)
+      - R is the set of relations (parsing the input question will return the question relation r_q)
+      - L is the set of directed edges between entities of the form l=(e_1, r, e_2) with e_1, e_2 \in E and r \in R
+    - (RLPA) in QA, the goal in terms of KG elements is defined as follows: we want to find an answer entity e_a given e_q and r_q, when (e_q, r_q, e_a) is not part of the graph G (which would mean that our KG already has the answer represented in it)
+    - a potential dataset we could use is the publicly available FB15k-237, which contains around 14k entities and 237 relatiosn resulting in over 272k facts (RLPA)
+
+
+  [FORMALIZATION]
+    - (RLPA) We can define any MDP as a structure containing the following elements: $\langle S, A, P, R, \gamma \rangle$ in which
+      - S is the finite set of possible states such that S_t is the state the system is in at time step t
+      - A is the finite set of possible actions such that A_t is the action taken at time step t
+      - P is the state transition probability matrix such that the probability of going from state s to state s' after taking action a is P[S_{t+1} = s' | S_t = s, A_t = a]
+      - R is the reward function such that the expected reward when the system is in state s and the agent performs action a is E[R_{t+1} | S_t = s, A_t = a]
+      - \gamma \in [0, 1] is the discount factor reflecting how much we prefer short-term rewards over long-term ones
