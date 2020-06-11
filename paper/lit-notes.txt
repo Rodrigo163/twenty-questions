@@ -56,7 +56,8 @@
       - which makes sense for us? which one are we going to use?
       - "Because models have to be reasonably accurate to be useful, model-free methods can have advantages over more complex methods when the real bottleneck in solving a problem is the difficulty of constructing a sufficiently accurate environment model" [12]{SuttonBarto2018}
 
-  [KNOWLEDGE REPRESENTATION]
+  [KNOWLEDGE BASE]
+    - I guess "knowledge base" is a general term, and "knowledge graph" is one type of knowledge base?
     - graph theory is a powerful knowledge representation framework (RLPA)
     - graphs have been used as environments for RL agents: it is intuitively easy to imagine the agent taking steps from node to node via the existing edges (RLPA)
     - when using a knowledge graph for question answering, the first step is to parse the input question into a constituent question entity and relation, e.g. mapping "What is the capital of France?" to \langle France, capital of \rangle (RLPA)
@@ -68,7 +69,6 @@
     - (RLPA) in QA, the goal in terms of KG elements is defined as follows: we want to find an answer entity e_a given e_q and r_q, when (e_q, r_q, e_a) is not part of the graph G (which would mean that our KG already has the answer represented in it)
     - a potential dataset we could use is the publicly available FB15k-237, which contains around 14k entities and 237 relatiosn resulting in over 272k facts (RLPA)
 
-
   [FORMALIZATION]
     - (RLPA) We can define any MDP as a structure containing the following elements: $\langle S, A, P, R, \gamma \rangle$ in which
       - S is the finite set of possible states such that S_t is the state the system is in at time step t
@@ -76,3 +76,20 @@
       - P is the state transition probability matrix such that the probability of going from state s to state s' after taking action a is P[S_{t+1} = s' | S_t = s, A_t = a]
       - R is the reward function such that the expected reward when the system is in state s and the agent performs action a is E[R_{t+1} | S_t = s, A_t = a]
       - \gamma \in [0, 1] is the discount factor reflecting how much we prefer short-term rewards over long-term ones
+
+[20Q IMPLEMENTATIONS]
+  - "In the game, the answerer first thinks of an object such as a famous person or a kind of animal. Then the questioner tries to guess the object by asking 20 questions. In a Q20 game system, the user is considered as the answerer while the system itself acts as the questioner which requires a good strategy of question selection to figure out the correct object and win the game" [3233]{HuEa2018}
+  - {HuEa2018} propose a method that does not rely on a knowledge base of objects
+    - "Although the decision tree based method seems like a natural fit to the Q20 game, it typically require[sic] a well defined Knowledge Base (KB) that contains enough information about each object, which is usually not available in practice" [3233]{HuEa2018}
+    - "Burgener (2006) instead use a [sic] object-question relevance table" (whatever that is) [3233]{HuEa2018}
+    - not using a KB is good if you really care about performing well in noisy environments, but I don't think we care that much about that (this is only a term project), so using a KB and operating within its constraints is sufficient for our purposes
+  - "we formulate the process of question selction [sic] in the game as a Markov Decision Process (MDP), and further propose a novel policy-based RL framework to learn the optimal policy of question selection in the Q20 game" [3233]{HuEa2018}
+  - "Our questioner agent maintains a probability distribution over all objects to model the confidence of the target object, and updates the confidence based on answers from the user" [3233]{HuEa2018}
+    - I really like this
+    - "the ability to sample questions, compared to greedy selection [= just choosing the one with the highest reward], also improves the diversity of questions asked by our agent, which is crucial for user experience" [3234]{HuEa2018}
+    - "The initial state s_0 [i.e. the starting probability distribution] can either be a uniform distribution or initialised by the prior knowledge" [3235]{HuEa2018}
+  - Description of the RL framework:
+    "The user in our system is the answerer who thinks of a target object o_{tgt} in the object set O at the beginning of the game. Our policy-based agent acts as the questioner that can ask 20 questions to figure out what exactly o_{tgt} is. Specifically, an internal state vector s is maintained by our agent, which describes the confidence about o_{tgt}. At each time-step t, the agent picks up the promising action (select a question) according to the policy \pi_\theta(a|s_t), and transits from the state s_t to the next state s_{t+1} after receiving the answer (yes/no/unknown) from the user. The historical trajectories \langle s_t, a_t, r_{t+1}, r_{t+1} \rangle are stored in a \textit{replay memory} which enables the agent to be trained on previously observed data by sampling from it." [3234]{HuEa2018}
+    - "Note that only when a guess is made about o_{tgt} at the end of game [sic] can the agent receive a reward signal, which makes it unable to distinguish the importance of each selected question. Therefore, we design a RewardNet to learn the more informative reward at each time-step and thus lead the agent to achieve the better performance" [3234]{HuEa2018}
+      - Will we need to do this too? How will we take on this problem?
+  - want to prefer  questions that "can narrow down the searching space to a greater extent" [3236]{HuEa2018}
