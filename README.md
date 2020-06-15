@@ -1,6 +1,6 @@
-# 20 Questions with reinforcement learning
+# 20 Questions
 
-A 20-questions-style question asker using reinforcement learning.
+A 20-questions-style question asker.
 
 Term project for the course **PM1 Question Processing** at the Universität Potsdam in the summer semester 2020, taught by Dr. Tatjana Scheffler.
 
