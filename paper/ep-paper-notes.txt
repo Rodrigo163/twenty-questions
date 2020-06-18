@@ -51,3 +51,4 @@
 
     - doesn't seem to matter too much which method I use, so I'll use the apply to col method because it's shorter
     - actually, this is better, because we might want rankings of which are the best to use at any given time
+    - for example, if there are two that both have the same min distance to 1, could randomly choose between them (reduces determinism)
