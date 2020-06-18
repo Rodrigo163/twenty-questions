@@ -13,17 +13,41 @@
         - if 0 < ratio < 1, many more ==1 than ==0
       - in algorithm, will need to re-calculate this at every step in the decision tree
     - there might be other strategies too, but this one is what I'll implement
-  - efficiently computing difference of this ratio from 1
+  - efficiently computing difference of this ratio from 1---is there a difference between methods?
+
     - method 1: apply to col, idxmin
+
+      def dist_from_1(attrib_col):
+        counts = attrib_col.value_counts()
+        if len(counts) == 2:
+            ratio = counts[0] / counts[1]
+            return abs( 1 - ratio )
+        return -1
+      X.apply(dist_from_1, axis=0).idxmin()
+
       - 100 rows, 28 features: 35.6 ms ± 3.24 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
       - 10 rows, 28 features: 33.2 ms ± 1.02 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
       - 100 rows, 14 features: 19.8 ms ± 1.47 ms per loop (mean ± std. dev. of 7 runs, 100 loops each)
       - 100 rows, 7 features: 11 ms ± 531 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 
     - method 2: for loop on df, return feature
+
+      def feat_nearest_1(df):
+          curr_min = 10e10
+          curr_min_feat = ''
+          for feat in df.columns:
+              counts = X[feat].value_counts()
+              ratio = counts[0] / counts[1]
+              dist_from_1 = abs( 1 - ratio )
+              if dist_from_1 < curr_min:
+                  curr_min = dist_from_1
+                  curr_min_feat = feat
+          return curr_min_feat
+
       - 100 rows, 28 features: 32.9 ms ± 1.17 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
       - 10 rows, 28 features: 36.4 ms ± 3.7 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
       - 100 rows, 14 features: 16.5 ms ± 430 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
       - 100 rows, 7 features: 10.3 ms ± 811 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 
     - doesn't seem to matter too much which method I use, so I'll use the apply to col method because it's shorter
+    - actually, this is better, because we might want rankings of which are the best to use at any given time 
