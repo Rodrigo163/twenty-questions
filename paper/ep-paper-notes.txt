@@ -50,4 +50,4 @@
       - 100 rows, 7 features: 10.3 ms ± 811 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
 
     - doesn't seem to matter too much which method I use, so I'll use the apply to col method because it's shorter
-    - actually, this is better, because we might want rankings of which are the best to use at any given time 
+    - actually, this is better, because we might want rankings of which are the best to use at any given time
