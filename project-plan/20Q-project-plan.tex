@@ -128,7 +128,10 @@ We illustrate this principle with the feature that minimises  $abs(1 - SCR(f))$ 
 \implies abs(1 - SCR(Predator)) &= 0.18.
 \end{align*}
 
-In this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR)$ (or if there are multiple features with the same value, we randomly choose between them).
+For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, we would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
+In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' rather than ``Does it have hair?".
+
+So in this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR)$ (or if there are multiple features with the same value, we randomly choose between them).
 The first split of the development dataset is always on \textit{Predator}, since that results in the most even partition of the input space into subsets of size 45 or 55, depending on whether the user answers 0 or 1.
 %(Then eventually, if none of the features contain mixtures of 0s and 1s and thus cannot be used to distinguish objects anymore, we switch to cycling through all candidate objects that cannot be further differentiated and asking about each of them in turn.)
 
@@ -155,7 +158,8 @@ There is a straightforward measure of success of our system overall: $\frac{\tex
 The slope of the curve won't ever get bigger than one, but we'd want it to approach one, since that means the system is winning every game that it plays.
 The slope of that curve at its endpoint is actually given by the rational expression $\frac{\text{games won}}{\text{games played}}$ \citep[50--51]{Baayen2001}, so we can evaluate how our system performs after $x$ games by looking at how close that value is to one.
 Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$ and see how close that value is to zero.%
-	\footnote{Depending on how intense we want to get about this whole thing, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.}
+	\footnote{Depending on how intense we want to get about this whole thing, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
+	There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.}
 
 \begin{center}
 	\includegraphics[width=.5\linewidth]{growth-curve2.png}
