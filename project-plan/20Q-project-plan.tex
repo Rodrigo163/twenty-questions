@@ -1,0 +1,73 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[margin=2.75cm]{geometry}
+\usepackage{lipsum}
+\usepackage{libertine}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage[colorlinks=false, pdfborderstyle={/S/U/W 1}]{hyperref}
+
+\usepackage{fontspec}
+\setmonofont{Courier New}
+
+\usepackage[backend=biber, 
+natbib=true, 
+style=C:/texmf/bst/biblatex-sp-unified/bbx/biblatex-sp-unified,
+citestyle=C:/texmf/bst/biblatex-sp-unified/cbx/sp-authoryear-comp, 
+maxbibnames=99, 
+isbn=false, 
+doi=false, 
+eprint=false]{biblatex}
+\addbibresource{ep.bib}
+
+\usepackage[libertine]{newtxmath} % to get libertine as math font too
+
+\usepackage{xspace}
+
+\usepackage{enumitem}
+%\setlist{nosep}
+\setlist{noitemsep}
+
+\usepackage{url}
+%\urlstyle{same}
+
+\usepackage{setspace}
+\onehalfspacing
+
+\pagenumbering{gobble}
+
+% ------------------------------------------------------------------------------------------------------ %
+
+\begin{document}
+
+\noindent PM1 Question Processing \hfill \today
+
+\section*{Project plan: 20 Questions}
+\noindent Wellesley Boboc, Anna-Janina Goecke, Rodrigo Lopez Portillo Alcocer, Elizabeth Pankratz
+
+\subsection*{Task, motivation, and previous work}
+What is you hypothesis / task /question?
+Why is this important/interesting? (motivation)
+What work are you building on (= papers you read)?  What have they done? How do they define the problem? Is this a good kind of definition? What do you approach differently from them / how do you go beyond?
+
+\subsection*{Data}
+What data would you use (where is the data/annotation available? What is annotated in the data, how big is it? What is in there, etc)
+
+\subsection*{Implementation}
+How will you approach the task? Ie, what kind of ML system? (think about size of training data, can you use other data for augmentation?) Why is this approach appropriate? What will be your individual steps (ie: baseline system, incremental improvement)
+
+\subsection*{Evaluation}
+How will you evaluate and analyse your results? (VERY IMPORTANT!)
+
+\singlespacing
+
+\printbibliography
+% -----------------------------------------------
+
+\end{document}
