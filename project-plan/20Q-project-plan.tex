@@ -119,8 +119,8 @@ So, for the feature \textit{Hair}, we get
 $$\frac{|Hair = 0|}{|Hair = 1|} = \frac{57}{43} \approx 1.33.$$
 
 We call this value, $1.33$, the \textsc{split cardinality ratio} (SCR) for the feature \textit{Hair}, and we want to choose the feature whose SCR is as close as possible to 1.
-Or in other words, we want to choose the feature for which $abs(1 - SCR(f))$ is minimised.
-We illustrate this principle with the feature that minimises  $abs(1 - SCR(f))$ in the current development dataset, \textit{Predator}:
+Or in other words, we want to choose the feature $f$ for which $abs(1 - SCR(f))$ is minimised.
+We illustrate this principle by also looking at the feature that actually minimises  $abs(1 - SCR(f))$ in the current development dataset, \textit{Predator}:
 
 \begin{align*}
 \frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
@@ -128,7 +128,7 @@ We illustrate this principle with the feature that minimises  $abs(1 - SCR(f))$ 
 \implies abs(1 - SCR(Predator)) &= 0.18.
 \end{align*}
 
-For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, we would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
+For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, our system would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
 In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' rather than ``Does it have hair?".
 
 So in this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR)$ (or if there are multiple features with the same value, we randomly choose between them).
