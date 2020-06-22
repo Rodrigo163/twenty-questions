@@ -54,13 +54,13 @@ eprint=false]{biblatex}
 \subsection*{Task and motivation}
 
 Our task is to build a system that will play the game 20 Questions (20Q).
-A human player will be able to think of a target object, and the system will strategically questions that allows it to narrow down the candidate objects in its knowledge base.
+A human player will be able to think of a target object, and the system will strategically select questions that allow it to narrow down the candidate objects in its knowledge base.
 It will incorporate the answers it receives and ultimately make a guess about what that target object could be.
-If the target object is not already in its knowledge base, it will be added in based on the information the user has provided, probably interpolating from other closely-related objects.
+If the target object that the human player has in mind is not already in its knowledge base, the system will add it in based on the information the user has provided.
 
 This task is interesting and challenging, because it not only involves generating natural-language questions to present to the human player, but also choosing which questions are the best ones to ask, and manipulating the knowledge representation in accordance with the answers that the human player provides.
 
-So, on the one hand, the project contains the computational-linguistic subtask of question generation (given a feature in the dataset, generate a natural-language question asking about that feature to display to the user), and on the other the engineering subtask of knowledge base manipulation.
+So, on the one hand, the project contains the computational-linguistic subtask of question generation (given a feature in the dataset, generate a natural-language question asking about that feature to display to the user), and on the other, the engineering subtask of knowledge base manipulation.
 There, we will need to strategically select the best question to ask, incorporate the answers from the user as the game is played, and at the end, add previously-unseen objects into the knowledge base.
 
 \subsection*{Related work}
