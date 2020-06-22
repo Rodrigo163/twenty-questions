@@ -88,17 +88,51 @@ boar & 1 & 0 & 0 & 1 & 0 & \ldots \\
 \end{tabular}
 \end{center}
 
-Whichever dataset we end up actually using must be larger than this and have many more features.
+Whichever dataset we end up actually using should be larger than this and have many more features, since the system is currently almost always able to finish within the 20-question limit.
 We are currently looking for open-source knowledge bases like this to use.
-
-%What data would you use (where is the data/annotation available? What is annotated in the data, how big is it? What is in there, etc)
 
 \subsection*{Implementation}
 
-The machine learning system that we will use to implement this task is fairly simple: we will just use a decision tree (DT).
-It is intuitive to think of 20Q as a DT, where asking/answering each successive question ``prunes the branches'' until (in a perfect world) there is only one leaf node remaining, representing an object that has all the properties specified by the player.
-This is why we have chosen this approach.
-Also, it is appropriate for smaller datasets, and since we don't know yet what kinds of knowledge bases are available, we wanted to have a system that is as flexible as possible.
+The machine learning system that we will use to implement this task is fairly simple: a decision tree (DT), also known as a CART model, which stands for ``classification and regression tree'' \citep[Section 16.2]{Murphy2012}.
+A DT is ``defined by recursively partitioning the input space, and defining a local model in each resulting region of input space'' \citep[545]{Murphy2012}.
+In our case, the input space consists of the knowledge base described above, and this knowledge base is recursively partitioned by each successive question that the system asks and the user answers.
+However, in contrast to defining a local model in \textit{each} resulting region of input space, we will only retain the subset of the knowledge base that is compatible with the user's answers.
+
+But how will we partition the space in an optimal way, or in other words, how will we choose which question to ask?
+One standard method in classification DTs splits the space on the feature that minimises the entropy (i.e.\ maximises the information gain; \citealt{Quinlan1986}), in each partition.
+However, that method is not applicable here.
+That method requires an $n : 1$ mapping of instances to each class, which is the usual set-up in classification problems: one class contains multiple instances.
+In our task, though, each individual object equates to a class (i.e.\ there's an \textit{aardvark} class, an \textit{antelope} class, and so on), so there is only one instance per class.
+That makes our problem a non-typical classification task, so a different method needs to be used.
+
+We chose to orient ourselves around the size of the two partitions of the input space that result from splitting on a given feature, and we select the feature that produces the partitions that are closest to each other in size.
+To illustrate, say that we split on the first feature given above, \textit{Hair}.
+We would end up with one partition containing 57 animals that have no hair (i.e.\ where \textit{Hair} $= 0$), and another partition containing 43 animals with hair (i.e.\ where \textit{Hair} $= 1$).
+To see how even this split is, we take a ratio of these two numbers.
+We want this ratio to be as close to 1 as possible, since that would represent a perfect split of our input space in half: $\frac{50}{50} = 1$.
+This is because consistently splitting our input space in half is the best way to reduce its size efficiently \hl{[find good source or improve explanation? Rodrigo, do you have any ideas?]}.
+
+So, for the feature \textit{Hair}, we get
+
+$$\frac{|Hair = 0|}{|Hair = 1|} = \frac{57}{43} \approx 1.33.$$
+
+We call this value, $1.33$, the \textsc{split cardinality ratio} (SCR) for the feature \textit{Hair}, and we want to choose the feature whose SCR is as close as possible to 1.
+Or in other words, we want to choose the feature for which $abs(1 - SCR(f))$ is minimised.
+We illustrate this principle with the feature that minimises  $abs(1 - SCR(f))$ in the current development dataset, \textit{Predator}:
+
+\begin{align*}
+\frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
+\implies SCR(Predator) & = 0.82\\
+\implies abs(1 - SCR(Predator)) &= 0.18.
+\end{align*}
+
+In this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR)$ (or if there are multiple features with the same value, we randomly choose between them).
+The first split of the development dataset is always on \textit{Predator}, since that results in the most even partition of the input space into subsets of size 45 or 55, depending on whether the user answers 0 or 1.
+%(Then eventually, if none of the features contain mixtures of 0s and 1s and thus cannot be used to distinguish objects anymore, we switch to cycling through all candidate objects that cannot be further differentiated and asking about each of them in turn.)
+
+There are certainly other strategies that could be used for choosing a question.
+This algorithm could be made more sophisticated by learning from previous games, or by performing an analysis of the features to see which ones are mutually exclusive, and so on.
+But we're keeping it simple for now.
 
 The steps in our implementation will be as follows (everything following 1 can be concurrent):
 \begin{enumerate}
@@ -107,16 +141,6 @@ The steps in our implementation will be as follows (everything following 1 can b
 	\item Implement the rule-based question generation, based on the structures of yes/no questions in corpora, e.g.\ Switchboard.
 	\item Implement the incorporation of previously-unseen objects into the knowledge base.
 \end{enumerate}
-
-
-\hl{So, how do we choose which question to ask at any given time?
-We use the principle of information gain.
-[...]}
-
-There are certainly other ways to choose a question.
-One could also make this more complex by learning from previous games, performing an analysis of the features to see which ones are mutually exclusive, and so on.
-But we're keeping it simple for now.
-
 
 \subsection*{Evaluation}
 
