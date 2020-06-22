@@ -157,13 +157,13 @@ There is a straightforward measure of success of our system overall: $\frac{\tex
 
 The slope of the curve won't ever get bigger than one, but we'd want it to approach one, since that means the system is winning every game that it plays.
 The slope of that curve at its endpoint is actually given by the rational expression $\frac{\text{games won}}{\text{games played}}$ \citep[50--51]{Baayen2001}, so we can evaluate how our system performs after $x$ games by looking at how close that value is to one.
-Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$ and see how close that value is to zero.%
-	\footnote{Depending on how intense we want to get about this whole thing, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
-	There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.}
-
+Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$ and see how close that value is to zero.
 \begin{center}
 	\includegraphics[width=.5\linewidth]{growth-curve2.png}
 \end{center}
+
+Depending on how intense we want to get about this whole thing, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
+There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.
 
 (We should also keep track of whether/how many losses come from exceeding the 20 question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.)
 
