@@ -24,7 +24,7 @@ maxbibnames=99,
 isbn=false, 
 doi=false, 
 eprint=false]{biblatex}
-\addbibresource{ep.bib}
+\addbibresource{qp.bib}
 
 \usepackage[libertine]{newtxmath} % to get libertine as math font too
 
@@ -112,7 +112,7 @@ To illustrate, say that we split on the first feature given above, \textit{Hair}
 We would end up with one partition containing 57 animals that have no hair (i.e.\ where \textit{Hair} $= 0$), and another partition containing 43 animals with hair (i.e.\ where \textit{Hair} $= 1$).
 To see how even this split is, we take a ratio of these two numbers.
 We want this ratio to be as close to 1 as possible, since that would represent a perfect split of our input space in half: $\frac{50}{50} = 1$.
-This is because since we only have two "branches" for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. We selected this approach based on tree-based algorithms such as ID3.
+This is because since we only have two ``branches" for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. We selected this approach based on tree-based algorithms such as ID3.
 
 So, for the feature \textit{Hair}, we get
 
