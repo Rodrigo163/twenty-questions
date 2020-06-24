@@ -165,7 +165,8 @@ Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$
 Depending on how intense we want to get about this whole thing, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
 There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.
 
-(We should also keep track of whether/how many losses come from exceeding the 20 question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.)
+(We should also keep track of whether/how many losses come from exceeding the 20 question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.
+Wellesley also mentioned that we should count the number of questions that it takes for the system to win.)
 
 Also, we should evaluate the goodness of the out-of-database items that we interpolate.
 We could use human annotators who don't look at any of the other items in the dataset and only annotate the out-of-database items for all the features we use? 
