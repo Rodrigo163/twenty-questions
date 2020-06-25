@@ -138,29 +138,23 @@ We are currently developing the implementation on a preliminary knowledge set av
 It is a table consisting of 100 objects (mostly animals) and 28 features for each, and each cell in the table is populated with a 1 or a 0 to indicate that the given animal does or does not have the given feature.
 For example, the first few rows and columns of the dataset look like this:
 
-%\begin{center}
-%	\begin{tabular}{lcccccc}
-%	\toprule
-%Animal & Hair & Feathers & Eggs & Milk & Airborne & \ldots \\ \midrule
-%aardvark & 1 & 0 & 0 & 1 & 0 & \ldots \\
-%antelope & 1 & 0 & 0 & 1 & 0 & \ldots \\
-%bass & 0 & 0 & 1 & 0 & 0 & \ldots \\
-%bear & 1 & 0 & 0 & 1 & 0 & \ldots \\
-%boar & 1 & 0 & 0 & 1 & 0 & \ldots \\
-%\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & $\ddots$ \\
-%\bottomrule
-%\end{tabular}
-%\end{center}
+\begin{center}
+	\begin{tabular}{lcccccc}
+	\toprule
+Animal & Hair & Feathers & Eggs & Milk & Airborne & \ldots \\ \midrule
+aardvark & 1 & 0 & 0 & 1 & 0 & \ldots \\
+antelope & 1 & 0 & 0 & 1 & 0 & \ldots \\
+bass & 0 & 0 & 1 & 0 & 0 & \ldots \\
+bear & 1 & 0 & 0 & 1 & 0 & \ldots \\
+boar & 1 & 0 & 0 & 1 & 0 & \ldots \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & $\ddots$ \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 Whichever dataset we end up actually using should be larger than this and have many more features, since the system is currently almost always able to finish within the 20-question limit.
-<<<<<<< Updated upstream
-We also found another promising dataset called Animals with Attributes\footnote{\url{https://cvml.ist.ac.at/AwA2/}} consisting of around 50 classes and 85 attributes. We are currently looking for larger open-source knowledge bases like this to use.
-=======
-We also found another promising dataset called Animals with Attributes%
-%	\footnote{\url{https://cvml.ist.ac.at/AwA2/}}%
- consisting of around 50 classes and 85 attributes. 
- We are currently looking for larger open-source knowledge bases like this to use.
->>>>>>> Stashed changes
+We also found another promising dataset called Animals with Attributes\footnote{\url{https://cvml.ist.ac.at/AwA2/}} consisting of around 50 classes and 85 attributes. 
+We are currently looking for larger open-source knowledge bases like this to use.
 
 \subsection*{Implementation}
 
@@ -181,12 +175,8 @@ To illustrate, say that we split on the first feature given above, \textit{Hair}
 We would end up with one partition containing 57 animals that have no hair (i.e.\ where \textit{Hair} $= 0$), and another partition containing 43 animals with hair (i.e.\ where \textit{Hair} $= 1$).
 To see how even this split is, we take a ratio of these two numbers.
 We want this ratio to be as close to 1 as possible, since that would represent a perfect split of our input space in half: $\frac{50}{50} = 1$.
-<<<<<<< Updated upstream
-This is because since we only have two ''branches" for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. We selected this approach based on tree-based algorithms such as ID3 \citep{Quinlan1986} \cite{Bishop}
-=======
 This is because since we only have two ``branches'' for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. 
 We selected this approach based on tree-based algorithms such as ID3 \citep{Quinlan1986, Bishop2006}.
->>>>>>> Stashed changes
 
 So, for the feature \textit{Hair}, we get
 
@@ -196,11 +186,11 @@ We call this value, $1.33$, the \textsc{split cardinality ratio} (SCR) for the f
 Or in other words, we want to choose the feature $f$ for which $abs(1 - SCR(f))$ is minimised.
 We illustrate this principle by also looking at the feature that actually minimises  $abs(1 - SCR(f))$ in the current development dataset, \textit{Predator}:
 
-%\begin{align*}
-%\frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
-%\implies SCR(Predator) & = 0.82\\
-%\implies abs(1 - SCR(Predator)) &= 0.18.
-%\end{align*}
+\begin{align*}
+\frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
+\implies SCR(Predator) & = 0.82\\
+\implies abs(1 - SCR(Predator)) &= 0.18.
+\end{align*}
 
 For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, our system would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
 In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' rather than ``Does it have hair?".
