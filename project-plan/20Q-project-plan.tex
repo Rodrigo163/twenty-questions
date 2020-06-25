@@ -71,8 +71,8 @@ We will briefly explore two areas in the literature that are relevant for our im
 
 \subsection{Previous 20Q implementations}
 
-Previous approaches to the implementation of a 20Q system have made use of diverse methods including probabilistic models \citep{DeyEa2019}, Reinforcement Learning (RL; \citealt{HuEa2018}), and variations of Artificial Neural Networks (ANNs) \citep{ReddyEa2017, Burgener2006, ToninEa2018}.
-The knowledge that the 20Q system has is often represented in a knowledge graph (KG; \citealt{DeyEa2019}), though some more sophisticated approaches also make do without \citep[e.g.][]{HuEa2018}.%
+Previous approaches to the implementation of a 20Q system have made use of diverse methods including probabilistic models \citep{DeyEa2019}, Reinforcement Learning (RL; \citealt{HuEa2018}), and variations of Artificial Neural Networks (ANNs; \citealt{ReddyEa2017, Burgener2006, ToninEa2018}).
+The knowledge that the 20Q system has is often represented in a knowledge graph (KG; \citealt{DeyEa2019}), though some more sophisticated approaches also manage without \citep[e.g.][]{HuEa2018}.%
 	\footnote{A KG is essentially a graph where the nodes are entities and the edges between them are facts that connect them.
 	For instance, a node \textit{Macron} might be connected to a node \textit{Paris} by the edge \textit{lives in} \citep[example from][]{GodinEa2019}, representing knowledge of the fact \textit{Macron lives in Paris}.}
 Here, we will briefly discuss the relative merits of these implementations and how they inform our work on this project.
@@ -86,7 +86,7 @@ In those cases, the system is still able to choose what the correct target objec
 
 \citet{DeyEa2019} implemented a probabilistic model which operates on the dataset as weighted edge-node relations of a KG and updates throughout the course of the game. 
 Here, the main idea of adjusting probabilities at every time step was exploited to generate a model that is able to predict the correct target object in fewer than twenty questions. 
-Of particular interest is the way the model handles incorrect answers from the human player: the question generator does not fully reject or accept a certain object as being the target after every answer. 
+Of particular interest is the way the model handles incorrect answers from the human player: the question generator does not fully reject or accept a certain object as being the target after every answer. f
 Instead, it rebalances the probabilities at each step in the game. 
 To identify the target object, the model categorizes the questions into two layers, a primary layer (wide range of objects) and a secondary layer (specific range, targeted towards a small set of objects). 
 Even though the model has been proven to perform very well, i.e.\ half of the target objects could be identified in fewer than ten questions, their work is very limited in that it is designed to only apply to Bollywood movies. 
@@ -103,11 +103,11 @@ While this system clearly has excellent performance, incorporating RL into our p
 Another approach that is probably too sophisticated for us, but nevertheless useful to know about, is the use of neural networks.
 For example, \citet{ReddyEa2017} propose the application of KGs to generate sets of question-answer pairs within a Recurrent Neural Network architecture by deriving triple relations from given entities. 
 The triples are composed of a subject, an object (both represented as nodes in the KG), and a predicate (represented as an edge in the KG). 
-The model consists of two units: the \texit{Question Keywords and Answer Extractor}, which directly selects necessary information about an object from the KG, and the \texit{Natural Language Question Generator}, which is used as an encoder and decoder of the object’s representation. 
+The model consists of two units: the \textit{Question Keywords and Answer Extractor}, which directly selects necessary information about an object from the KG, and the \textit{Natural Language Question Generator}, which is used as an encoder and decoder of the object’s representation. 
 Since this model has been able to outperform comparable approaches on question generation, we could consider adapting some of the assumptions, such as deriving the triple relations of the KG, for our project implementation. 
 
 Perhaps the most widely-known implementation of the 20Q game is that of \citet{Burgener2006}, which can be found at \url{20q.net} and is also a popular toy. 
-With more than 88 million plays, Burgener’s implementation has a precision rate of 80\% when it asks 20 questions, and 95\% for 25 questions. 
+With more than 88 million plays, Burgener’s implementation has a precision rate of 80\% when it asks twenty questions, and 95\% for twenty-five questions. 
 The patent for the game describes the implementation of the deep ANN, which is structured as a matrix of target objects by questions. 
 Each cell of the matrix contains an input-output connection weight, which defines the relationship between the questions/answers and the target objects. 
 The network has two so-called modes: the first takes questions as input and targets as output, and the second takes target objects as input nodes and questions as outputs. 
@@ -122,9 +122,9 @@ While our immediate plan is to implement a binary answering system (or perhaps a
 Finally, \citet{ToninEa2018} describe another ANN implementation of the 20Q framework as part of a brain-computer interface to enable people with motor impairments to communicate. 
 The system uses a weight matrix to store the strength of the connection between target statements and questions (where negative weights indicate that the expected answer to the question is no, and vice-versa for positive weights). 
 After 15 questions, the model checks to see if there is only one target statement with a positive value. 
-If there is no single positive value after 20 questions, the network returns the statement with the highest current value. 
+If there is no single positive value after twenty questions, the network returns the statement with the highest current value. 
 When the network correctly estimates the target, the weight matrix is updated. 
-We may want to adopt this sort of ``early checking'' threshold before a final guess after 20 questions. 
+We may want to adopt this sort of ``early checking'' threshold before a final guess after twenty questions. 
 This paper also presents a very interesting example of how a 20Q implementation may have useful applications outside of the realm of games and entertainment.
 
 \subsubsection{Rule-based Question Generation}
@@ -228,7 +228,7 @@ The steps in our implementation will be as follows (not necessarily in this orde
 	\item Write baseline DT system that decides at each step the optimal question to ask, narrows down the knowledge base to the objects compatible with the yes/no answers it receives, and ultimately makes guesses until the number of questions has reached 20 (done).
 	\item Instead of always choosing the optimal feature as we currently do, sample feature based on $abs(1 - SCR(f))$ distribution. 
 	\item Incorporate probabilistic weighting of objects.
-	\item Incorporate handling of answers beyond yes and no (closely related to (2)).
+	\item Incorporate handling of answers beyond yes and no (closely related to (3)).
 	\item Implement the rule-based question generation, based on the structures of yes/no questions in corpora, e.g.\ Switchboard.
 	\item Implement the incorporation of previously-unseen objects into the knowledge base.
 \end{enumerate}
@@ -253,7 +253,7 @@ Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$
 Depending on how intense we want to get, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
 There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.
 
-(We should also keep track of whether/how many losses come from exceeding the 20 question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.
+(We should also keep track of whether/how many losses come from exceeding the twenty-question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.
 We should also keep track of the number of questions that it takes for the system to win.)
 
 In addition to evaluating the system's performance in gameplay, we should also evaluate the goodness of the out-of-database items that we interpolate.
