@@ -63,7 +63,7 @@ If the target object that the human player has in mind is not already in its kno
 This task is interesting and challenging because it not only involves generating natural-language questions to present to the human player, but also choosing which questions are the best ones to ask, and manipulating the knowledge representation in accordance with the answers that the human player provides.
 
 So, on the one hand, the project contains the computational-linguistic subtask of question generation (given a feature in the dataset, generate a natural-language question asking about that feature to display to the user), and on the other, the engineering subtask of knowledge base manipulation.
-There, we will need to strategically select the best question to ask, incorporate the answers from the user as the game is played, and at the end, add previously-unseen objects into the knowledge base.
+For the latter, we will need to strategically select the best question to ask, incorporate the answers from the user as the game is played, and at the end, add previously-unseen objects into the knowledge base.
 
 \section{Related work}
 
@@ -81,8 +81,8 @@ We begin with some probabilistic approaches.
 In general, these are characterised by maintaining a probability distribution over the set of outcomes.
 Consequently, none of the possible outcomes are ever totally discounted or thrown away---just associated with a lower probability.
 %These are often associated with Bayesian-style updating, where the probabilities are computed anew after every time step.
-This approach is good for situations in which the questions are answered by the users in a ``noisy'' way (e.g.\ when users accidentally answer inconsistently or wrongly).
-In those cases, the system is still able to choose what might be the correct target object, even though the user has answered in a way that might seem incompatible with that object.
+This approach is good for situations in which the questions are answered by the users in a ``noisy'' way (e.g.\ when users answer inconsistently or wrongly).
+In those cases, the system is still able to choose what the correct target object might be, even though the user has answered in a way that might seem incompatible with that object.
 
 \citet{DeyEa2019} implemented a probabilistic model which operates on the dataset as weighted edge-node relations of a KG and updates throughout the course of the game. 
 Here, the main idea of adjusting probabilities at every time step was exploited to generate a model that is able to predict the correct target object in fewer than twenty questions. 
@@ -96,14 +96,14 @@ However, the use of KGs to create 20Q (probably adapted from graph format into a
 However, their approach is different in that they use an RL framework: they implement a policy-based system of 20Q that uses reinforcement throughout the game. 
 Instead of using a KG, the model for selecting questions is based on RL procedures trying to find the optimal reward function. 
 %The questioner agent relies on a probability distribution over all objects which is then updated according to the answers.
-\citet{HuEa2018} suggest a neural network that they call RewardNet which learns the immediate reward at each time step to improve the overall performance of the model, since only receiving a reward at the end doesn't allow the system to learn for each question.
+\citet{HuEa2018} suggest a neural network that they call RewardNet which learns the immediate reward at each time step to improve the overall performance of the model, since only receiving a reward at the end of the game wouldn't allow the system to learn for each question.
 The model continually improved its win rate over time and was shown to be able to identify the target object within 14 questions.
 While this system clearly has excellent performance, incorporating RL into our project is not feasible; it is included in this literature review only for the sake of completeness.
 
 Another approach that is probably too sophisticated for us, but nevertheless useful to know about, is the use of neural networks.
-For example, \citet{ReddyEa2017} propose the application of KGs to generate sets of question-answer pairs within a Recurrent Neural Network architecture by deriving from given entities triple relations. 
+For example, \citet{ReddyEa2017} propose the application of KGs to generate sets of question-answer pairs within a Recurrent Neural Network architecture by deriving triple relations from given entities. 
 The triples are composed of a subject, an object (both represented as nodes in the KG), and a predicate (represented as an edge in the KG). 
-The model consists of two units: the Question Keywords and Answer Extractor, which directly selects necessary information about an object from the KG, and the Natural Language Question Generator, which is used as an encoder and decoder of the object’s representation. 
+The model consists of two units: the \texit{Question Keywords and Answer Extractor}, which directly selects necessary information about an object from the KG, and the \texit{Natural Language Question Generator}, which is used as an encoder and decoder of the object’s representation. 
 Since this model has been able to outperform comparable approaches on question generation, we could consider adapting some of the assumptions, such as deriving the triple relations of the KG, for our project implementation. 
 
 Perhaps the most widely-known implementation of the 20Q game is that of \citet{Burgener2006}, which can be found at \url{20q.net} and is also a popular toy. 
@@ -135,7 +135,7 @@ This is because questions in 20Q are syntactically limited, so we do not need mo
 
 An interesting approach to rule-based QG is the work of \citet{MhatreEa2019}, which is based on keyword modelling using Named Entity Recognition (NER) to generate questions from an input sequence. 
 Each input sentence is preprocessed and parsed to resolve anaphoric reference. 
-Thereafter, NER is used to identify the type of entity which is important for the choice of \textit{wh}-component for the QG part of the model. 
+Thereafter, NER is used to identify the type of entity, which is important for the choice of \textit{wh}-component for the QG part of the model. 
 Depending on the output of the NER procedure, the appropriate \textit{wh}-pronoun is chosen. 
 One type of questions they create are yes-no questions, which is the type of question we will focus on.
 To construct this kind of question, the authors simply perform subject-auxiliary inversion. 
@@ -213,7 +213,7 @@ We illustrate this principle by also looking at the feature that actually minimi
 \end{align*}
 
 For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, our system would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
-In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' rather than ``Does it have hair?".
+In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' before asking ``Does it have hair?", as the former is more informative.
 
 So in this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR(f))$ (or if there are multiple features with the same value, we randomly choose between them).
 The first split of the development dataset is always on \textit{Predator}, since that results in the most even partition of the input space into subsets of size 45 or 55, depending on whether the user answers 0 or 1.
