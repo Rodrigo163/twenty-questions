@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt]{article}
 
-\usepackage[margin=2.5cm]{geometry}
+
+\usepackage[margin=3cm]{geometry}
 \usepackage{lipsum}
 \usepackage{libertine}
 \usepackage{multirow}
@@ -66,32 +67,100 @@ So, on the one hand, the project contains the computational-linguistic subtask o
 There, we will need to strategically select the best question to ask, incorporate the answers from the user as the game is played, and at the end, add previously-unseen objects into the knowledge base.
 
 \subsection*{Related work}
+\subsubsection*{Previous 20Q Implementations: Knowledge Graphs, Reinforcement Learning, Artificial Neural Networks}
+Past approaches to the implementation of a 20Q system have made use of Knowledge Graphs (KG) in combination with rule-based question generation (QG; \citealt{DeyEa2019}), Reinforcement Learning \citep{HuEa2018}, or variations of Artificial Neural Networks (ANN) \citep{Burgener2006, ToninEa2018}. Below we will discuss the relative merits of these implementations and how they inform our work on this project.
 
-\hl{TODO: What work are you building on (= papers you read)?  What have they done? How do they define the problem? Is this a good kind of definition? What do you approach differently from them / how do you go beyond?}
+\citet{JedynakEa2012} describe a 20Q implementation with noise, discussing Bayes optimal policies for entropy loss. 
+Their model seeks to minimize, after a fixed number of questions, the expected entropy of the posterior by implementing a probabilistic bisection strategy \citep{Horstein1963, WaeberEa2011}, and discusses uses of this method for stochastic search, computer vision, and other applications. 
 
-We could take inspiration from literature on 20Q overall (there have been RL approaches, what else?) as well as from literature on rule-based question generation.
+\citet{DeyEa2019} implemented another instance of a probabilistic model, one which operates on the dataset as weighted edge-node relations of a KG and updates throughout the course of the game. 
+Here, the main idea of adjusting probabilities at every time step was exploited to generate a model that is able to predict the correct target object in fewer than twenty questions. 
+Of particular interest is the way the model handles incorrect answers from the human player: the question generator does not fully reject or accept a certain object as being the target after every answer. 
+Instead, it rebalances the probabilities at each step in the game. 
+To identify the target object, the model categorizes the questions into two layers, a primary layer (wide range of objects) and a secondary layer (specific range, targeted towards a small set of objects). Even though the model has been proven to perform very well, i.e.\ half of the target objects could be identified in fewer than ten questions, their work is very limited in that it is designed to only apply to Bollywood movies. 
+However, the use of KG to create 20Q is an approach that we would like to pursue for our 20Q implementation, by further elaborating the ideas of \citet{DeyEa2019}, among others.
+
+\citet{ReddyEa2017} propose the application of KG to generate sets of question-answer pairs within a Recurrent Neural Network architecture by deriving triple relations from given entities. 
+The triples are composed by a subject, an object (both are represented as nodes in the KG) and a predicate (represented as edge in the KG). 
+The model consists of two units: the Question Keywords and Answer Extractor, which directly selects necessary information about an object from the KG, and the Natural Language Question Generator, which is used as an encoder and decoder of the object’s representation. 
+Since this model has been able to outperform comparable approaches on question generation, we would consider refining some of the assumptions, such as deriving a triple relations of the KG, for our project implementation. 
+
+\citet{HuEa2018} implement a policy-based system of 20Q that uses reinforcement throughout the game. 
+While an entropy-based method makes use of a KG, in this work, the model for selecting questions is based on Reinforcement Learning procedures trying to find the optimal reward function. 
+The questioner agent relies on a probability distribution over all objects which is then updated according to the answers.
+\citet{HuEa2018} suggest a RewardNet to learn the immediate reward at each time step to improve the overall performance of the model. 
+The model continually improved its win rate over time and was shown to be able to identify the target object within 14 questions.
+
+Perhaps the most widely-known implementation of the 20Q game is that of \citet{Burgener2006}, which can be found at 20q.net and is also a popular toy. 
+With more than 88 million plays, Burgener’s implementation has a precision rate of 80\% when it asks 20 questions, and 95\% for 25 questions. 
+The patent for the game describes the implementation of the deep ANN, which is structured as a matrix of target objects by questions. 
+Each cell of the matrix contains an input-output connection weight, which defines the relationship between the questions/answers and the target objects. 
+The network has two so-called modes: the first takes questions as input and targets as output, and the second takes target objects as input nodes and questions as outputs. 
+The first mode maps answers to weights, while the second mode ranks questions. 
+Similar to \citet{DeyEa2019}, target objects are prioritized, rather than filtered. 
+This is a primary motivation for Burgener’s choice of architecture, as it allows the model to correctly predict the target even when given incorrect or inconsistent answers. 
+As Burgener explains, it also allows the system to take into account cultural/demographic differences that may result in inconsistent answers about a given target object. 
+This is a consideration we should also be mindful of in our implementation, as our proposed model operates on the assumption that the user is providing truthful answers (and that inter-user agreement would be high). 
+The system of weights also allows allows for a more complex set of inputs than binary yes/no (e.g.\ Sometimes, Maybe, Depends, Rarely) where the degree of certainty of the answer is reflected in the weights used. 
+While our plan is to implement a binary answering system (or perhaps a three-way system, where ``unsure/unknown'' could also be an answer that would not contribute to the machine’s prediction), keeping degrees of certainty in mind may help us to improve our final implementation.
+
+\citet{ToninEa2018} describe another ANN implementation of the 20Q framework as part of a brain-computer interface to enable people with motor impairments to communicate. 
+The system uses a weight matrix to store the strength of the connection between target statements and questions (where negative weights indicate that the expected answer to the question is no, and vice-versa for positive weights). 
+After 15 questions, the model checks to see if there is only one target statement with a positive value. 
+If there is no single positive value after 20 questions, the network returns the statement with the highest current value. 
+When the network correctly estimates the target, the weight matrix is updated. 
+We may want to adopt this sort of ``early checking'' threshold before a final guess after 20 questions. 
+This paper also presents a very interesting example of how a 20Q implementation may have useful applications outside of the realm of games and entertainment.
+
+\subsubsection*{Rule-based Question Generation}
+In the field of Natural Language Question Generation, one of the approaches to generate syntactically coherent questions is based on finding rules. 
+The work of \citet{MhatreEa2019}, for instance, is based on keyword modelling using Named Entity Recognition (NER) to generate questions from an input sequence. 
+Each input sentence is preprocessed and parsed to resolve anaphoric reference. 
+Thereafter, NER is used to identify the type of entity which is important for the choice of wh-component for the QG part of the model. 
+Depending on the output of the NER procedure, the appropriate wh-pronoun is chosen. 
+One type of questions they create are yes-no questions. 
+To construct this kind of question, \citet{MhatreEa2019} perform subject-auxiliary inversion. 
+Since this work makes use of the spaCy architecture (https://spacy.io), it is of particular interest for this project. 
+We would like to follow a rule-based approach regarding the generation of questions. 
+In the case of NER, spaCy is a widely used structure that provides a large range of entity types. 
+
+\citet{KhullarEa2018} concentrate on rule-based QG using relative pronouns to achieve high syntactic accuracy and semantic suitability. 
+Their system uses the spaCy dependency parser to evaluate the syntactic structure of sentences. 
+Firstly, the input sentence is parsed to gain information about the presence of relative pronouns and about several linguistic features. 
+Afterwards, this information is input to one rule within a predefined rule set to create the questions. 
+The correct wh-component is then determined according to these rules, resulting in a syntactically coherent question. 
+
+Both of the above-mentioned systems are fascinating in that they consist of a simple structure by using spaCy’s dependency parser and NER methods. 
+By further elaborating these approaches we should be able to construct simple yet appropriate yes-no questions for our 20Q model.
 
 \subsection*{Data}
 We are currently developing the implementation on a preliminary knowledge set available \href{https://github.com/drdevinhopkins/20_Questions/blob/master/knowledge_base.csv}{here}.
 It is a table consisting of 100 objects (mostly animals) and 28 features for each, and each cell in the table is populated with a 1 or a 0 to indicate that the given animal does or does not have the given feature.
 For example, the first few rows and columns of the dataset look like this:
 
-\begin{center}
-	\begin{tabular}{lcccccc}
-	\toprule
-Animal & Hair & Feathers & Eggs & Milk & Airborne & \ldots \\ \midrule
-aardvark & 1 & 0 & 0 & 1 & 0 & \ldots \\
-antelope & 1 & 0 & 0 & 1 & 0 & \ldots \\
-bass & 0 & 0 & 1 & 0 & 0 & \ldots \\
-bear & 1 & 0 & 0 & 1 & 0 & \ldots \\
-boar & 1 & 0 & 0 & 1 & 0 & \ldots \\
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & $\ddots$ \\
-\bottomrule
-\end{tabular}
-\end{center}
+%\begin{center}
+%	\begin{tabular}{lcccccc}
+%	\toprule
+%Animal & Hair & Feathers & Eggs & Milk & Airborne & \ldots \\ \midrule
+%aardvark & 1 & 0 & 0 & 1 & 0 & \ldots \\
+%antelope & 1 & 0 & 0 & 1 & 0 & \ldots \\
+%bass & 0 & 0 & 1 & 0 & 0 & \ldots \\
+%bear & 1 & 0 & 0 & 1 & 0 & \ldots \\
+%boar & 1 & 0 & 0 & 1 & 0 & \ldots \\
+%\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & $\ddots$ \\
+%\bottomrule
+%\end{tabular}
+%\end{center}
 
 Whichever dataset we end up actually using should be larger than this and have many more features, since the system is currently almost always able to finish within the 20-question limit.
+<<<<<<< Updated upstream
 We also found another promising dataset called Animals with Attributes\footnote{\url{https://cvml.ist.ac.at/AwA2/}} consisting of around 50 classes and 85 attributes. We are currently looking for larger open-source knowledge bases like this to use.
+=======
+We also found another promising dataset called Animals with Attributes%
+%	\footnote{\url{https://cvml.ist.ac.at/AwA2/}}%
+ consisting of around 50 classes and 85 attributes. 
+ We are currently looking for larger open-source knowledge bases like this to use.
+>>>>>>> Stashed changes
 
 \subsection*{Implementation}
 
@@ -112,7 +181,12 @@ To illustrate, say that we split on the first feature given above, \textit{Hair}
 We would end up with one partition containing 57 animals that have no hair (i.e.\ where \textit{Hair} $= 0$), and another partition containing 43 animals with hair (i.e.\ where \textit{Hair} $= 1$).
 To see how even this split is, we take a ratio of these two numbers.
 We want this ratio to be as close to 1 as possible, since that would represent a perfect split of our input space in half: $\frac{50}{50} = 1$.
+<<<<<<< Updated upstream
 This is because since we only have two ''branches" for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. We selected this approach based on tree-based algorithms such as ID3 \citep{Quinlan1986} \cite{Bishop}
+=======
+This is because since we only have two ``branches'' for each feature (yes or no, 1 or 0), consistently splitting our input space in half would result in the highest information gain regarding the class label. 
+We selected this approach based on tree-based algorithms such as ID3 \citep{Quinlan1986, Bishop2006}.
+>>>>>>> Stashed changes
 
 So, for the feature \textit{Hair}, we get
 
@@ -122,11 +196,11 @@ We call this value, $1.33$, the \textsc{split cardinality ratio} (SCR) for the f
 Or in other words, we want to choose the feature $f$ for which $abs(1 - SCR(f))$ is minimised.
 We illustrate this principle by also looking at the feature that actually minimises  $abs(1 - SCR(f))$ in the current development dataset, \textit{Predator}:
 
-\begin{align*}
-\frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
-\implies SCR(Predator) & = 0.82\\
-\implies abs(1 - SCR(Predator)) &= 0.18.
-\end{align*}
+%\begin{align*}
+%\frac{|Predator = 0|}{|Predator = 1|} &= \frac{45}{55} \approx 0.82 \\
+%\implies SCR(Predator) & = 0.82\\
+%\implies abs(1 - SCR(Predator)) &= 0.18.
+%\end{align*}
 
 For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, our system would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
 In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' rather than ``Does it have hair?".
@@ -174,6 +248,7 @@ Then we can compare their results to those output by Rodrigo's system.
 (We could either do it ourselves or source some ``crowdworkers'' among our friends using Google Forms again---will leave this up to Anna and/or Wellesley).
 
 % -----------------------------------------------
+\pagebreak
 \singlespacing
 \printbibliography
 % -----------------------------------------------
