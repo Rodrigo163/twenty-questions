@@ -30,20 +30,24 @@
 % smaller than 5cm (the original size); we will check this
 % in the camera-ready version and ask you to change it back.
 
-\title{PM Question Processing : 20 Questions}
+\title{PM Question Processing Final Project: 20 Questions}
 
 \author{Wellesley Boboc \\
-  Matriculation number: xxxxxx \\
-  \texttt{email@domain} \\\And
-  Anna-Janina Goecke \\
-  Matriculation number: xxxxxx \\
-  \texttt{email@domain} \\\AND
-  Rodrigo Lopez Portillo Alcocer \\
-  Matriculation number: xxxxxx \\
-  \texttt{email@domain} \\\And
-  Elizabeth Pankratz \\
-  Matriculation number: xxxxxx \\
-  \texttt{email@domain} \\}
+Universit{\"a}t Potsdam \\
+Matriculation nr.: xxxxxx \\
+\texttt{email@domain} \\\And
+Anna-Janina Goecke \\
+Universit{\"a}t Potsdam \\
+Matriculation nr.: xxxxxx \\
+\texttt{email@domain} \\\AND
+Rodrigo Lopez Portillo Alcocer \\
+Universit{\"a}t Potsdam \\
+Matriculation nr.: xxxxxx \\
+\texttt{email@domain} \\\And
+Elizabeth Pankratz \\
+Universit{\"a}t Potsdam \\
+Matriculation nr.: xxxxxx \\
+\texttt{email@domain} \\}
 
 \date{}
 
@@ -54,7 +58,7 @@
 \lipsum[1]
 \end{abstract}
 
-\section{Task and motivation}
+\section{Introduction: Task and motivation}
 
 Our task is to build a system that will play the game 20 Questions (20Q).
 A human player will be able to think of a target object, and the system will strategically select questions that allow it to narrow down the candidate objects in its knowledge base.
@@ -232,10 +236,20 @@ There are certainly other strategies that could be used for choosing a question.
 This algorithm could be made more sophisticated by learning from previous games, or by performing an analysis of the features to see which ones are mutually exclusive, and so on.
 And indeed, to reduce the determinism that comes from always selecting the best question, we will probably instead sample questions from the distribution over $f$ of $abs(1 - SCR(f))$, such that the best feature is most likely to be selected, but other decently-informative questions are also possible candidates.
 
+[update to include transforming SCR into a probability distribution and sampling from that]
+
 \subsection{Bayesian-style updating and probabilistic guessing}
 
-\lipsum[1]
+\begin{itemize}
+	\item to improve flexibility of our system, and in particular to not reject all answers where the user answered incorrectly, we were inspired by Bayesian updating to initialise a uniform prior probability over all animals in our database and then update it question by question to reflect the probability of each animal in our database being the one that the user is thinking of
+	\item using the term probability loosely here, since it's more of a probability score (doesn't always add up to 1)
+\end{itemize}
 
+\begin{figure}
+	\includegraphics[width=.8\linewidth]{Bayesian-updating.png}
+	\caption{Example distributions of probability scores across animals at Q1, Q2, and Q20, with the highest-probability animal (the one most consistent with the user's answers) highlighted}
+	\label{fig:bayesian-update}
+\end{figure}
 
 \subsection{Rule-based question generation}
 
