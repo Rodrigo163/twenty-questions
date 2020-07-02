@@ -34,19 +34,19 @@
 
 \author{Wellesley Boboc \\
 Universit{\"a}t Potsdam \\
-Matriculation nr.: xxxxxx \\
+Matriculation number: xxxxxx \\
 \texttt{email@domain} \\\And
 Anna-Janina Goecke \\
 Universit{\"a}t Potsdam \\
-Matriculation nr.: xxxxxx \\
+Matriculation number: xxxxxx \\
 \texttt{email@domain} \\\AND
 Rodrigo Lopez Portillo Alcocer \\
 Universit{\"a}t Potsdam \\
-Matriculation nr.: xxxxxx \\
+Matriculation number: xxxxxx \\
 \texttt{email@domain} \\\And
 Elizabeth Pankratz \\
 Universit{\"a}t Potsdam \\
-Matriculation nr.: xxxxxx \\
+Matriculation number: xxxxxx \\
 \texttt{email@domain} \\}
 
 \date{}
@@ -175,7 +175,7 @@ For example, the first few rows and columns of the dataset look like this:
 		\bottomrule
 	\end{tabular}
 \end{center}
-\caption{The first five rows (instances) and columns (features) in our knowledge base.}
+\caption{The first rows (instances) and columns (features) in our knowledge base}
 \label{tab:knowledge-base}
 \end{table}
 
@@ -187,7 +187,7 @@ We are currently looking for larger open-source knowledge bases like this to use
 
 [intro sentence]
 
-\subsection{Choice of feature at each step}
+\subsection{Probabilistic feature selection}
 
 The machine learning system that we will use to implement this task is fairly simple: a decision tree (DT), also known as a CART model, which stands for ``classification and regression tree'' \citep[Section 16.2]{Murphy2012}.
 A DT is ``defined by recursively partitioning the input space, and defining a local model in each resulting region of input space'' \citep[545]{Murphy2012}.
@@ -228,22 +228,45 @@ We illustrate this principle by also looking at the feature that actually minimi
 For \textit{Hair}, this value is $abs(1 - 1.33) = 0.33$, which is greater than $0.18$, so given the choice between these two features, our system would choose to split the input space on \textit{Predator} rather than \textit{Hair}.
 In question-processing terms, this means we would ask the user a question like ``Is it a predator?'' before asking ``Does it have hair?", as the former is more informative.
 
-So in this way, for each question the system has to ask, we compute the SCRs of all features in the input space, and choose the one with the smallest value of $abs(1 - SCR(f))$ (or if there are multiple features with the same value, we randomly choose between them).
-The first split of the development dataset is always on \textit{Predator}, since that results in the most even partition of the input space into subsets of size 45 or 55, depending on whether the user answers 0 or 1.
-%(Then eventually, if none of the features contain mixtures of 0s and 1s and thus cannot be used to distinguish objects anymore, we switch to cycling through all candidate objects that cannot be further differentiated and asking about each of them in turn.)
+However, this leads to quite a rigid gameplay, since the first split is always on \texttt{Predator}, since that results in the most even partition of the input space into subsets of size 45 or 55, depending on whether the user answers 0 or 1.
+Therefore, we decided to transform the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step, but other reasonably informative features are also possible candidates.
+This leads to a more varied gameplay.
 
-There are certainly other strategies that could be used for choosing a question.
-This algorithm could be made more sophisticated by learning from previous games, or by performing an analysis of the features to see which ones are mutually exclusive, and so on.
-And indeed, to reduce the determinism that comes from always selecting the best question, we will probably instead sample questions from the distribution over $f$ of $abs(1 - SCR(f))$, such that the best feature is most likely to be selected, but other decently-informative questions are also possible candidates.
+Admittedly, this system does not learn to ask better questions over time; the method of choosing the best feature to ask about at a given time does not follow a strategy that extends beyond each individual turn.
+We chose to focus our efforts on other parts of the project instead, since the current strategy already works quite well, and automatically deals with correlated features (see below).
+If we were to develop the system further, though, this would certainly be a point of improvement, e.g. by learning from previous games which sequences of questions tend to perform well.
 
-[update to include transforming SCR into a probability distribution and sampling from that]
+Interestingly, though, because of the way we bisect the database based on the features that best distinguish the animals still contained in it, we end up avoiding a potential pitfall of this kind of problem ``for free'': we automatically avoid asking about highly correlated features.
+In other words, once we learn the information about one feature, the system will tend not to ask about a feature that is highly correlated with the one we just learend about.
+Take the features feathers and two legs, for example.
+If we say feathers = 1, then all of the animals with feathers = 0 disappear and we're left with a dataset that probably largely contains animals with two legs, i.e.\ where the two-legs feature = 1. 
+That means that the two-legs feature is not good at halving the size of the dataset anymore, since it's a less even mixture of 0s and 1s. 
+This makes it less likely to be selected as the feature to ask about than another feature that is independent of feathers and thus still contains a good mix of 0s and 1s.
+The fact that we don't have to worry about correlated features is an advantage of our bisection method.
+If we changed the game-play strategy, we'd probably have to tell the system about correlated features explicitly.
+For that reason, we are satisfied with our current method.
 
-\subsection{Bayesian-style updating and probabilistic guessing}
+[Update the above once we have correlation scores between features, and then we can play a bunch of games and see if this is really true.]
 
-\begin{itemize}
-	\item to improve flexibility of our system, and in particular to not reject all answers where the user answered incorrectly, we were inspired by Bayesian updating to initialise a uniform prior probability over all animals in our database and then update it question by question to reflect the probability of each animal in our database being the one that the user is thinking of
-	\item using the term probability loosely here, since it's more of a probability score (doesn't always add up to 1)
-\end{itemize}
+\subsection{Bayesian-inspired probability distribution over animals}
+
+In the gameplay, once the features have all been used up or can no longer be used to distinguish the animals (i.e.\ if all remaining features for the animals that are compatible with all of the user's answers have all 0s or all 1s), we move on to the stage of guessing the animals that the user might be thinking of.
+We were inspired by the approaches of \citet{DeyEa2019}, \citet{HuEa2018}, and \citet{Burgener2006}, who all maintain a probability distribution over outcomes that is updated over the course of the game based on the answers that the user provides.
+The benefits of this approach, as we mentioned above, are to improve the flexibility of the system, and in particular to not reject outright any outcomes that are incompatible with the user's answers.
+Instead of removing these from the pool of potential answers immediately, their probability is simply reduced, but this means that they are still ``in the running'' to be guessed by our system, after it has guessed the higher-probability items.
+
+(We are using the term ``probability'' loosely here, since the values corresponding to each animal do not add up to 1.
+So we should say ``probability score'' instead.
+Really, this is bargain-basement Bayesian updating.)
+
+We initialise a uniform prior probability score across all animals at the beginning of the game and update it after each question based on the user's answers.
+Specifically, we divide the current probability for each animal in half if it is incompatible with the answer the user just gave.
+(Halving was an arbitrary choice, but it works.)
+Once the features have all been used up, we have a distribution of probability scores across animals that reflect how compatible they are with the user's answers.
+
+The animals that are perfectly compatible with everything the user has entered have the same probability score that they started with; those that are incompatible with only one answer have half of the prior score, and so on.
+Figure \ref{fig:bayesian-update} illustrates how this distribution changes over the course of a game.
+At the end of the game, the system guesses the animals in decreasing order of probability.
 
 \begin{figure}
 	\includegraphics[width=.8\linewidth]{Bayesian-updating.png}
@@ -289,5 +312,22 @@ One way to do this would be to use ``crowdworkers'' (our friends, probably) to a
 
 \bibliography{qp}
 \bibliographystyle{acl_natbib}
+
+\appendix
+
+\section{Individual contributions}
+\label{app:contributions}
+
+All group members were in regular, active communication about ideas and directions in which to take the project.
+It was a fully collaborative effort throughout.
+We summarise here how we divided the workload between the four of us.
+
+\paragraph{Wellesley} Literature work, prepared and held the in-class presentation, wrote and proofread sections of the project plan and the final paper.
+
+\paragraph{Anna} Literature work, implemented the question generation, wrote sections of the project plan and the final paper.
+
+\paragraph{Rodrigo} Implemented the handling of out-of-database items, wrote sections of the final paper.
+
+\paragraph{Elizabeth} Implemented the core functionalities of the game, wrote sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
 
 \end{document}
