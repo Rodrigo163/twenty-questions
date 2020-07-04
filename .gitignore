@@ -46,3 +46,6 @@
 ## Python-related peripheral stuff:
 .ipynb_checkpoints
 __pycache__
+
+## Other clutter
+.DS_Store
