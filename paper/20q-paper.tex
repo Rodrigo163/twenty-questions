@@ -1,4 +1,4 @@
-% Note to self: Compile using BibTeX (NOT Biber!) and pdflatex (not xelatex!)
+% Note to self: Compile using BibTeX (not Biber!) and pdflatex (not xelatex!)
 
 \documentclass[11pt,a4paper]{article}
 \usepackage[hyperref]{acl2020}
@@ -269,7 +269,7 @@ Figure \ref{fig:bayesian-update} illustrates how this distribution changes over 
 At the end of the game, the system guesses the animals in decreasing order of probability.
 
 \begin{figure}
-	\includegraphics[width=.8\linewidth]{Bayesian-updating.png}
+	\includegraphics[width=.8\linewidth]{graphics/Bayesian-updating.png}
 	\caption{Example distributions of probability scores across animals at Q1, Q2, and Q20, with the highest-probability animal (the one most consistent with the user's answers) highlighted}
 	\label{fig:bayesian-update}
 \end{figure}
@@ -293,14 +293,14 @@ But because the system will (hopefully) consistently improve as we add new objec
 We can track this in a sort of growth curve across games:
 
 \begin{center}
-	\includegraphics[width=.5\linewidth]{growth-curve.png}
+	\includegraphics[width=.5\linewidth]{graphics/growth-curve.png}
 \end{center}
 
 The slope of the curve won't ever get bigger than one, but we'd want it to approach one, since that means the system is winning every game that it plays.
 The slope of that curve at its endpoint is actually given by the rational expression $\frac{\text{games won}}{\text{games played}}$ \citep[50--51]{Baayen2001}, so we can evaluate how our system performs after some arbitrary number of games by looking at how close that value is to one.
 Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$ and see how close that value is to zero.
 \begin{center}
-	\includegraphics[width=.5\linewidth]{growth-curve2.png}
+	\includegraphics[width=.5\linewidth]{graphics/growth-curve2.png}
 \end{center}
 
 Depending on how intense we want to get, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
