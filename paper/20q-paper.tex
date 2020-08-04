@@ -60,6 +60,8 @@ Matriculation number: 804865 \\
 \begin{document}
 \maketitle
 
+\pagenumbering{arabic}
+
 \begin{abstract}
 lorem ipsum
 \end{abstract}
@@ -196,7 +198,6 @@ For example, a subset of the knowledge base looks like this:
 \end{table}
 
 We compiled this dataset by combining a knowledge base with 100 animals and 50 features made available \href{https://github.com/drdevinhopkins/20_Questions/blob/master/knowledge_base.csv}{on GitHub} with ???.
-
 \hl{[WELLESLEY: details about knowledge base construction]}
 
 \section{Implementation}
@@ -269,8 +270,11 @@ f_{best} = \argmin_f\ abs(1 - SCR(f))
 
 However, if we were to always choose $f_{best}$ to ask about at every step, the gameplay would be rigid and repetitive.
 To make for a more varied gameplay, we decided to randomly sample a feature to ask about in proportion to its $abs(1 - SCR(f))$ score. 
-This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step, but other reasonably informative features are also possible candidates.
-\hl{[ELIZABETH: more detail.]}
+This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step.
+This means that any reasonably informative features are reasonably probable candidates.
+
+To do this, we first transformed small values for $abs(1 - SCR(f))$, i.e.\ small distances from one, into large values, representing their greater probability of being chosen, by determining the maximum distance from one and subtracting every feature's distance from that (and adding one, so that the feature with that maximum distance value does not have a probability in the end of zero).
+Then we scaled these transformed values into a probability distribution and sampled a feature from this distribution proportional to its probability.
 
 This method does have certain drawbacks (see Section \ref{sec:limit}), but in addition to its simplicity, it also comes with one further advantage.
 Even from the small subset of features shown in Table \ref{tab:knowledge-base}, it is apparent that the features are not independent.
@@ -326,7 +330,9 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 ``the perceived world is not an unstructured total set of equiprobable co-occurring attributes. Rather, the material objects of the world are perceived to possess (in Garner's 1974, sense) high correlational structure.
 That is, given a knower who perceives the complex attributes of feathers, fur, and wings, it is an empirical fact provided by the perceived world that wings co-occur with feathers more than with fur'' \citep[29]{Rosch1978}
 
-The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
+\vspace{\baselineskip}
+
+\noindent The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
 
 \begin{figure*}
 	\includegraphics[width=.9\linewidth]{graphics/call_graph.pdf}
@@ -341,11 +347,11 @@ The call graph in Figure \ref{fig:call-graph} provides a visual summary of how t
 
 \subsection{Win/loss rate}
 
-\hl{[?]}
+\hl{[RODRIGO]}
 
 \subsection{Quality of interpolated out-of-database items}
 
-\hl{[?]}
+\hl{[RODRIGO]}
 
 \section{Limitations}
 \label{sec:limit}
@@ -374,12 +380,12 @@ All group members were in regular, active communication about ideas and directio
 It was a fully collaborative effort throughout.
 We summarise here how we divided the workload between the four of us.
 
-\paragraph{Wellesley} Literature work, prepared and held the in-class presentation, wrote and proofread sections of the project plan and the final paper.
+\paragraph{Wellesley} Literature work, prepared and held the in-class presentation, researched GUI and online server options, wrote and proofread sections of the project plan and the final paper.
 
 \paragraph{Anna} Literature work, implemented the question generation, wrote sections of the project plan and the final paper.
 
-\paragraph{Rodrigo} Implemented the handling of out-of-database items, wrote sections of the final paper.
+\paragraph{Rodrigo} Implemented the handling of out-of-database items, conducted the evaluation, wrote sections of the final paper.
 
-\paragraph{Elizabeth} Implemented the \texttt{TwentyQuestions} class and its core methods, wrote sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
+\paragraph{Elizabeth} Implemented the \texttt{TwentyQuestions} class and its core methods, wrote and proofread sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
 
 \end{document}
