@@ -19,9 +19,12 @@ names(data_long) <- c('animal', 'question', 'value')
 ggplot(data_long, aes(x=animal, y=value)) +
   geom_bar(stat='identity') +
   facet_wrap( ~ question , ncol=1) + 
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.3),
+        axis.text.y = element_blank(),
         text = element_text(family='Times New Roman')) +
   labs(y=element_blank(), x=element_blank()) +
   NULL
   
-
+ggsave('updating.pdf', device=cairo_pdf, width=16, height=20, units='cm')
