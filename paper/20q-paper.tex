@@ -329,8 +329,8 @@ That is, given a knower who perceives the complex attributes of feathers, fur, a
 The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
 
 \begin{figure*}
-	\includegraphics[width=\linewidth]{graphics/call_graph.pdf}
-	\caption{Call graph of class methods in \texttt{TwentyQuestions} \hl{(WIP ELIZABETH)}}
+	\includegraphics[width=.9\linewidth]{graphics/call_graph.pdf}
+	\caption{Call graph of non-utility class methods in \texttt{TwentyQuestions}. Methods in (1) are for sampling features; (2) for asking users about features, getting user input, and taking the respective action; (3) for guessing animals; and (4) for the endgame and adding out-of-database animals}
 	\label{fig:call-graph}
 \end{figure*}
 
@@ -341,31 +341,11 @@ The call graph in Figure \ref{fig:call-graph} provides a visual summary of how t
 
 \subsection{Win/loss rate}
 
-[There is a straightforward measure of success of our system overall: $\frac{\text{games won}}{\text{games played}}$.
-But because the system will (hopefully) consistently improve as we add new objects to its knowledge base, the success rates we get in early games with the system will presumably not be as good as success rates from later games. 
-We can track this in a sort of growth curve across games:
-
-\begin{center}
-	\includegraphics[width=.5\linewidth]{graphics/growth-curve.png}
-\end{center}
-
-The slope of the curve won't ever get bigger than one, but we'd want it to approach one, since that means the system is winning every game that it plays.
-The slope of that curve at its endpoint is actually given by the rational expression $\frac{\text{games won}}{\text{games played}}$ \citep[50--51]{Baayen2001}, so we can evaluate how our system performs after some arbitrary number of games by looking at how close that value is to one.
-Or alternately, we could look at $\frac{\text{games lost}}{\text{games played}}$ and see how close that value is to zero.
-\begin{center}
-	\includegraphics[width=.5\linewidth]{graphics/growth-curve2.png}
-\end{center}
-
-Depending on how intense we want to get, we could model this second growth curve using a Zipf-Mandelbrot model \citep{Evert2004}, and that would allow us to predict how many games our system would have lost after an arbitrarily large number of games played.
-There is a package in R that we could use to do this: \texttt{zipfR} by \citet{BaroniEvert2014}.
-
-(We should also keep track of whether/how many losses come from exceeding the twenty-question limit and how many come from out-of-database items. Ideally, the 20-question-limit curve will not change much, and the out-of-database curve would change more.
-We should also keep track of the number of questions that it takes for the system to win.)]
+\hl{[?]}
 
 \subsection{Quality of interpolated out-of-database items}
 
-[In addition to evaluating the system's performance in gameplay, we should also evaluate the goodness of the out-of-database items that we interpolate.
-One way to do this would be to use ``crowdworkers'' (our friends, probably) to annotate the previously-unseen objects for all of the features that we use, and then compare those results to those output by the interpolation system.]
+\hl{[?]}
 
 \section{Limitations}
 \label{sec:limit}
