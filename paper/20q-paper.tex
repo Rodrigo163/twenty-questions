@@ -14,6 +14,7 @@
 \usepackage{graphicx}
 \usepackage{latexsym}
 \usepackage{booktabs}
+\usepackage{soul}
 \renewcommand{\UrlFont}{\ttfamily\small}
 
 \DeclareMathOperator*{\argmin}{argmin}
@@ -60,7 +61,7 @@ Matriculation number: 804865 \\
 \maketitle
 
 \begin{abstract}
-\lipsum[1]
+lorem ipsum
 \end{abstract}
 
 \section{Introduction: Task and motivation}
@@ -196,7 +197,7 @@ For example, a subset of the knowledge base looks like this:
 
 We compiled this dataset by combining a knowledge base with 100 animals and 50 features made available \href{https://github.com/drdevinhopkins/20_Questions/blob/master/knowledge_base.csv}{on GitHub} with ???.
 
-[WELLESLEY: details about knowledge base construction]
+\hl{[WELLESLEY: details about knowledge base construction]}
 
 \section{Implementation}
 \label{sec:impl}
@@ -269,7 +270,7 @@ f_{best} = \argmin_f\ abs(1 - SCR(f))
 However, if we were to always choose $f_{best}$ to ask about at every step, the gameplay would be rigid and repetitive.
 To make for a more varied gameplay, we decided to randomly sample a feature to ask about in proportion to its $abs(1 - SCR(f))$ score. 
 This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step, but other reasonably informative features are also possible candidates.
-[ELIZABETH: more detail.]
+\hl{[ELIZABETH: more detail.]}
 
 This method does have certain drawbacks (see Section \ref{sec:limit}), but in addition to its simplicity, it also comes with one further advantage.
 Even from the small subset of features shown in Table \ref{tab:knowledge-base}, it is apparent that the features are not independent.
@@ -314,16 +315,24 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 \subsection{Rule-based question generation}
 \label{subsec:qg}
 
-[ANNA]
+\hl{[ANNA]}
 
 
 \subsection{Incorporating out-of-database objects}
 \label{subsec:out-of-db}
 
-[RODRIGO]
+\hl{[RODRIGO]}
 
 ``the perceived world is not an unstructured total set of equiprobable co-occurring attributes. Rather, the material objects of the world are perceived to possess (in Garner's 1974, sense) high correlational structure.
 That is, given a knower who perceives the complex attributes of feathers, fur, and wings, it is an empirical fact provided by the perceived world that wings co-occur with feathers more than with fur'' \citep[29]{Rosch1978}
+
+The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
+
+\begin{figure*}
+	\includegraphics[width=\linewidth]{graphics/call_graph.pdf}
+	\caption{Call graph of class methods in \texttt{TwentyQuestions} \hl{(WIP ELIZABETH)}}
+	\label{fig:call-graph}
+\end{figure*}
 
 \section{Evaluation}
 \label{sec:eval}
@@ -391,6 +400,6 @@ We summarise here how we divided the workload between the four of us.
 
 \paragraph{Rodrigo} Implemented the handling of out-of-database items, wrote sections of the final paper.
 
-\paragraph{Elizabeth} Implemented the \texttt{twq} class and its core methods, wrote sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
+\paragraph{Elizabeth} Implemented the \texttt{TwentyQuestions} class and its core methods, wrote sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
 
 \end{document}
