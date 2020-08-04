@@ -16,6 +16,8 @@
 \usepackage{booktabs}
 \renewcommand{\UrlFont}{\ttfamily\small}
 
+\DeclareMathOperator*{\argmin}{argmin}
+
 \newcommand{\havehair}{\texttt{have\_hair}}
 \newcommand{\produceeggs}{\texttt{produce\_eggs}}
 
@@ -49,8 +51,8 @@ Matriculation number: xxxxxx \\
 \texttt{email@domain} \\\And
 Elizabeth Pankratz \\
 Universit{\"a}t Potsdam \\
-Matriculation number: xxxxxx \\
-\texttt{email@domain} \\}
+Matriculation number: 804865 \\
+\texttt{pankratz1@uni-potsdam.de} \\}
 
 \date{}
 
@@ -184,12 +186,11 @@ For example, a subset of the knowledge base looks like this:
 		badger & 1 & 0 & 0 \\
 		bass & 0 & 0 & 1 \\
 		bat & 1 & 0 & 0 \\
-		\vdots & \vdots & \vdots & \vdots \\
 		\bottomrule
 	\end{tabular}
 }}
 \end{center}
-\caption{The first rows (instances) and columns (features) in our knowledge base}
+\caption{The first five rows (instances) and three columns (features) in our knowledge base}
 \label{tab:knowledge-base}
 \end{table}
 
@@ -248,7 +249,7 @@ The best feature $f_{best}$ out of all features $f$ is the one for which the dis
 Formally, it is the solution to Equation \ref{eq:bestfeat}.
 
 \begin{equation}
-f_{best} = \text{argmin}_f\ abs(1 - SCR(f)) 
+f_{best} = \argmin_f\ abs(1 - SCR(f)) 
 \label{eq:bestfeat}
 \end{equation}
 
@@ -276,38 +277,39 @@ For example, if you know that an animal has hair (i.e.\ \havehair\ $= 1$), you p
 So, an intelligent system should not ask about both of these features, since it should have gained the knowledge contained in both of them by asking about only one.
 And, indeed, because of the way we bisect the database based on the features that best distinguish the animals still contained in it, we automatically avoid asking about highly correlated features.
 
-For example, if we tell the system \havehair\ $= 1$, then it bisects the database and removes all animals with \havehair\ $= 0$.
-However, since all animals with \havehair\ $= 0$ also have \produceeggs\ $= 1$ (in this toy example), the feature \produceeggs now also only contains the value 0.
+For example, let us pretend that the five animals and three features in Table \ref{tab:knowledge-base} constitute the entire knoweldge base.
+If we tell the system \havehair\ $= 1$, then it bisects the database and removes all animals with \havehair\ $= 0$.
+However, since all animals with \havehair\ $= 0$ also have \produceeggs\ $= 1$, the feature \produceeggs now also only contains the value 0.
 This makes it unsuitable as a feature to distinguish animals, so it will not be asked about in subsequent rounds.
-(Even if two features are not perfectly correlated, after bisecting the data on one of them, the mixture of 0s and 1s in the other feature will be less even, so it will be less likely to be selected as a feature to ask about.)
-%This is another reason why we are satisfied with the bisection method.
+(Even if two features are not perfectly correlated like these two are, after bisecting the data on one of them, the mixture of 0s and 1s in the other feature will be less even, so it will be less likely to be selected as a feature to ask about.)
 
-\subsection{Bayesian-inspired probability distribution over animals}
-\label{subsec:yprobdist}
+\subsection{Guessing the animals}
+\label{subsec:guess-animals}
 
-In the gameplay, once the features have all been used up or can no longer be used to distinguish the animals (i.e.\ if all remaining features for the animals that are compatible with all of the user's answers have all 0s or all 1s), we move on to the stage of guessing the animals that the user might be thinking of.
+Eventually, the gameplay will reach a point when the remaining animals in the pared-down knowledge base can no longer be distinguished by any of the features, since all the features will contain all 0s or all 1s.
+At this point, the game moves on to the stage of guessing the animals that the user may be thinking of.
+
 We were inspired by the approaches of \citet{DeyEa2019}, \citet{HuEa2018}, and \citet{Burgener2006}, who all maintain a probability distribution over outcomes that is updated over the course of the game based on the answers that the user provides.
-The benefits of this approach, as we mentioned above, are to improve the flexibility of the system, and in particular to not reject outright any outcomes that are incompatible with the user's answers.
+The motivation behind this approach, as we mentioned above, is to improve the flexibility of the system, and in particular to not reject outright any outcomes that are incompatible with the user's answers.
 Instead of removing these from the pool of potential answers immediately, their probability is simply reduced, but this means that they are still ``in the running'' to be guessed by our system, after it has guessed the higher-probability items.
 
-(We are using the term ``probability'' loosely here, since the values corresponding to each animal do not add up to 1.
-So we should say ``probability score'' instead.
-Really, this is bargain-basement Bayesian updating.)
+Technically, the distribution that we maintain over animals is not a probability, since it does not sum to one; rather, it is a probability score that keeps track of how (in)compatible each animal is with the answers that the user has provided so far.
+It can be thought of as bargain-basement Bayesian updating.
 
-We initialise a uniform prior probability score across all animals at the beginning of the game and update it after each question based on the user's answers.
-Specifically, we divide the current probability for each animal in half if it is incompatible with the answer the user just gave.
-(Halving was an arbitrary choice, but it works.)
+We initialise a uniform prior probability score of 20 (an arbitrary choice) across all animals at the beginning of the game and update it after each question based on the user's answers.
+Specifically, we divide the current probability for each animal in half (also an arbitrary choice) if it is incompatible with the answer the user just gave.
 Once the features have all been used up, we have a distribution of probability scores across animals that reflect how compatible they are with the user's answers.
 
 The animals that are perfectly compatible with everything the user has entered have the same probability score that they started with; those that are incompatible with only one answer have half of the prior score, and so on.
 Figure \ref{fig:bayesian-update} illustrates how this distribution changes over the course of a game.
 At the end of the game, the system guesses the animals in decreasing order of probability.
+For the example shown in Figure \ref{fig:bayesian-update}, it would guess \texttt{polar bear} and \texttt{hippopotamus} (the only ones with a probability score of 20), followed by the animals with a probability score of 10, and so on.
 
-\begin{figure}
-	\includegraphics[width=.8\linewidth]{graphics/Bayesian-updating.png}
-	\caption{Example distributions of probability scores across animals at Q1, Q2, and Q20, with the highest-probability animal (the one most consistent with the user's answers) highlighted}
+\begin{figure*}
+	\includegraphics[width=\linewidth]{graphics/updating.pdf}
+	\caption{Updating of probability scores across nine questions (only shown for a subset of 75 animals)}
 	\label{fig:bayesian-update}
-\end{figure}
+\end{figure*}
 
 \subsection{Rule-based question generation}
 \label{subsec:qg}
