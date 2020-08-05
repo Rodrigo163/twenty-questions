@@ -335,15 +335,16 @@ class TwentyQuestions():
 
         # convert feature into SpaCy doc (i.e. sequence of tokens)
         doc = nlp(feat_name)
-#         print("FEATURE:", doc)
+        # print("FEATURE:", doc)
 
         # The question type is decided based on the POS of the first word in the feature name
         first_token = doc[0]
         token_pos = first_token.pos_
-#         print('POS:', token_pos)
+        # print('POS:', token_pos)
 
         # BIASED POSITIVE QUESTIONS: "Your animal has wings, doesn't it?"
         if majority_val == 1 and extremeness > bias_threshold:
+            # print('BIASED QUESTION')
 
             # Participles, adjectives, adverbs
             if (token_pos == "VERB" and feat_name[-2:] == "ed") or token_pos == "ADJ" or token_pos == "ADV":
@@ -362,11 +363,17 @@ class TwentyQuestions():
 
             # Verbs: Third person singular, distinction of multiple-element feat_names and single-element feat_names
             # and auxiliaries, i.e. possessive 'has'
-            elif token_pos == "VERB" or token_pos == 'AUX':
+            elif token_pos == "VERB":
                 if word[2] != "": # if feat_name consists of more than 1 word
-                    question = f"Your animal {lexeme(word[0])[1]} {word[2]}, doesn't it?"
+#                     question = f"Your animal {lexeme(first_token)[1]} {word[2]}, doesn't it?"
+                    ## lexeme() is a terrible generator that always crashes on the first run-through but works fine after :(
+                    question = f"Your animal {str(first_token)+'s'} {word[2]}, doesn't it?"
                 else: # if feat_name consists of only 1 word
-                    question = f"Your animal {lexeme(word[0])[1]}, doesn't it?"
+                    question = f"Your animal {str(first_token)+'s'}, doesn't it?"
+
+            # Auxiliaries (i.e. 'have')
+            elif token_pos == 'AUX':
+                question = f"Your animal has {word[2]}, doesn't it?"
 
             # Adpositions
             elif token_pos == "ADP":
@@ -379,6 +386,7 @@ class TwentyQuestions():
 
         # NON-BIASED QUESTION: "Does your animal have wings?"
         else:
+            # print('UNBIASED QUESTION')
 
             if (token_pos == "VERB" and feat_name[-2:]== "ed") or token_pos == "ADJ" or token_pos == "ADV":
                 question = f"Is your animal {feat_name}?"
@@ -393,7 +401,7 @@ class TwentyQuestions():
                     question = f"Is your animal a {feat_name}?"
 
             elif token_pos == 'AUX':
-                question = f'Does your animal {lexeme(word[0])[0]} {word[-1]}?'
+                question = f'Does your animal have {word[2]}?'
 
             elif token_pos == "VERB":
                 question = f"Does your animal {feat_name}?"
@@ -791,7 +799,7 @@ class TwentyQuestions():
 #         # OLD VERSION: Doesn't worry about objective/subjective features; just chooses one and splits on it.
 #         feature_to_split_on = self.sample_feature(disting_feats)
 
-        print('FEAT:', feature_to_split_on)
+        # print('FEAT:', feature_to_split_on)
         majority_val, extremeness = self.get_majority_value_and_extremeness(feature_to_split_on)
         answ = self.ask_and_get_answer(feature_to_split_on, majority_val, extremeness)
         self.process_answer(feature_to_split_on, answ)
