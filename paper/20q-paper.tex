@@ -15,6 +15,8 @@
 \usepackage{latexsym}
 \usepackage{booktabs}
 \usepackage{soul}
+\usepackage{tabularx}
+    \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \renewcommand{\UrlFont}{\ttfamily\small}
 
 \DeclareMathOperator*{\argmin}{argmin}
@@ -60,8 +62,6 @@ Matriculation number: 804865 \\
 \begin{document}
 \maketitle
 
-\pagenumbering{arabic}
-
 \begin{abstract}
 lorem ipsum
 \end{abstract}
@@ -102,7 +102,7 @@ In those cases, the system is still able to choose what the correct target objec
 
 \citet{DeyEa2019} implemented a probabilistic model which operates on the dataset as weighted edge-node relations of a KG and updates throughout the course of the game. 
 Here, the main idea of adjusting probabilities at every time step was exploited to generate a model that is able to predict the correct target object in fewer than twenty questions. 
-Of particular interest is the way the model handles incorrect answers from the human player: the question generator does not fully reject or accept a certain object as being the target after every answer. f
+Of particular interest is the way the model handles incorrect answers from the human player: the question generator does not fully reject or accept a certain object as being the target after every answer. 
 Instead, it rebalances the probabilities at each step in the game. 
 To identify the target object, the model categorizes the questions into two layers, a primary layer (wide range of objects) and a secondary layer (specific range, targeted towards a small set of objects). 
 Even though the model has been proven to perform very well, i.e.\ half of the target objects could be identified in fewer than ten questions, their work is very limited in that it is designed to only apply to Bollywood movies. 
@@ -198,6 +198,7 @@ For example, a subset of the knowledge base looks like this:
 \end{table}
 
 We compiled this dataset by combining a knowledge base with 100 animals and 50 features made available \href{https://github.com/drdevinhopkins/20_Questions/blob/master/knowledge_base.csv}{on GitHub} with ???.
+
 \hl{[WELLESLEY: details about knowledge base construction]}
 
 \section{Implementation}
@@ -270,11 +271,8 @@ f_{best} = \argmin_f\ abs(1 - SCR(f))
 
 However, if we were to always choose $f_{best}$ to ask about at every step, the gameplay would be rigid and repetitive.
 To make for a more varied gameplay, we decided to randomly sample a feature to ask about in proportion to its $abs(1 - SCR(f))$ score. 
-This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step.
-This means that any reasonably informative features are reasonably probable candidates.
-
-To do this, we first transformed small values for $abs(1 - SCR(f))$, i.e.\ small distances from one, into large values, representing their greater probability of being chosen, by determining the maximum distance from one and subtracting every feature's distance from that (and adding one, so that the feature with that maximum distance value does not have a probability in the end of zero).
-Then we scaled these transformed values into a probability distribution and sampled a feature from this distribution proportional to its probability.
+This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step, but other reasonably informative features are also possible candidates.
+\hl{[ELIZABETH: more detail.]}
 
 This method does have certain drawbacks (see Section \ref{sec:limit}), but in addition to its simplicity, it also comes with one further advantage.
 Even from the small subset of features shown in Table \ref{tab:knowledge-base}, it is apparent that the features are not independent.
@@ -321,6 +319,82 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 
 \hl{[ANNA]}
 
+% SWDA TEXT
+
+The question generation section of this project consists of two sub-parts, namely (i) the pre-processing of the Switchboard Dialog Act Corpus (citation) in order to analyze wordtype-related structures of polar questions and (ii) the actual feature-to-question generation part. 
+
+We decided on working with the SwDA to be able to investigate structures of polar questions and to use those as a reference point for the upcoming question generation part. Since the 20Q gameplay is based exclusively on the use of Yes-No questions, we concentrated on extracting Part of Speech (POS) tags of question marked by the act-tag "qy" in the SwDA. To perform pre-processing on the corpus we firstly created a pandas dataframe containing the information that is needed for our purpose (question index, act-tag, text, and POS tags). Subsequently we generated an additional column containing POS tags based on the spaCy library which are easier to handle, due to their simplified structure. Table \ref{tab:swda_preprocessing} shows the first 5 rows of the final dataframe.
+
+\begin{table*}[ht]
+\centering
+\begin{center}
+{\small \texttt{
+	\begin{tabularx}{\linewidth}{ccLLL} 
+		\toprule
+		Index &Tag & Text & POS & Spacy\_POS \\ \midrule
+		83 & qy & Were you -- & Were/VBD you/PRP --/: & ['VERB', 'PRON']  \\
+		46 & qy & Are you in Texas?/ & Are/VBP you/PRP in/IN Texas/NNP ?/. & ['VERB', 'PRON', 'ADP', 'PROPN'] \\
+		29 & qy & I probably would |have done, \newline {D you know, } just… & I/PRP probably/RB would/MD \newline have/VB done/VBN ,/... & ['PRON', 'ADV', 'VERB', \newline 'VERB', 'VERB', 'NOUN'...] \\
+		1 & qy & Are you a Vietnam veteran, Dudley? \newline <Music>. / & Are/VBP you/PRP a/DT \newline Vietnam/NNP veteran/NN ,/... & ['VERB', 'PRON', 'DET', \newline 'PROPN', 'NOUN', 'PROP...] \\
+		5 & qy & Do you have family who \newline were in the Vietnam War? / & Do/VBP you/PRP have/VB \newline family/NN who/WP were/V... & ['VERB', 'PRON', 'VERB', \newline 'NOUN', 'PRON', 'VERB...] \\
+		\bottomrule
+	\end{tabularx}
+}}
+\end{center}
+\caption{The first five rows of the SwDA dataframe, including the spaCy POS tags.}
+\label{tab:swda_preprocessing}
+\end{table*}
+
+Non-informative POS tags such as "PUNCT" (i.e. punctuation) and "SPACE" (i.e. blank spaces) were removed from the dataframe. In order to investigate the general structure of "qy" questions, we concentrated on the beginning of those sentences and created a dictionary consisting of the first five POS tags of each sentence and the frequency of each unique POS tag pattern. This gave us 1332 unique POS tag combinations, where the most frequent ones follow the structure $VERB \rightarrow{PRON} \rightarrow{VERB} \rightarrow{...} $ (see Table \ref{tab:pos_patterns}). Accordingly, for the 20Q gameplay we will generate questions such as: "Does it have (a) tail?", "Does it live in the ocean?", "Is it big?". 
+
+\begin{table}
+\begin{center}
+{\small \texttt{
+	\begin{tabular}{lr}
+		\toprule
+		Occurrences & POS\_Tags \\ \midrule
+	    153 & (VERB, PRON, VERB, DET, NOUN)\\
+		90 & (VERB, PRON)\\
+		74 & (VERB, PRON, CCONJ, VERB, PRON)\\
+		69 & (PROPN, VERB, PRON, VERB, DET)\\
+		61 & (VERB, PRON, VERB)\\
+		\bottomrule
+	\end{tabular}
+}}
+\end{center}
+\caption{Unique POS tag patterns and their frequency counts, extracted from SwDA Corpus.}
+\label{tab:pos_patterns}
+\end{table}
+
+The purpose of our ask\_about\_feature function inside the 20Q gameplay is to print out a natural language question based on a given feature name. Thanks to the feedback we received in class about our project we decided on adding biased questions too. In order to chose a biased or non-biased question the arguments passed to this functions are (i) the feature name itself, (ii) a majority value which represents the majority value for a given feature (either 0 or 1), and (iii) an extremeness value which symbolizes how out-of-balanced the values for a given feature are. Depending on whether the value of extremeness reaches a certain threshold (in our case 0.65), a biased question is chosen over the non-biased version, since our model’s certainty about this value is high enough to ask a biased question. We firstly considered implementing not only positive-anchored biased questions (i.e. "Your animal is big, isn’t it?"), but also negative-anchored biased questions (i.e. "Your animal doesn’t have feathers, does it?"), but we realized that those elicit ambiguous responses which could negatively affect the functioning of our model. 
+
+\begin{enumerate}
+  \item Pre-processing: For the question generation itself, we had to perform pre-processing of the feature names by replacing the underscores and partitioning the feature names consisting of x-words into an x-tuple (i.e. in\_the\_ocean gives ("in," ","the"," ", "ocean"), have\_hair gives ("have"," ","hair").
+  \item Tokenization: The feature name has to be transformed into a sequence of tokens (i.e. spaCy doc) in order to be able to obtain POS tags in the next step. 
+  \item POS-tagging: Obtain POS tag for the first word in the feature name using spaCy’s pos\_ method.
+  \item Question Generation: Depending on the POS tag attained in the previous step, choose one of the pre-defined question patterns (see Table  \ref{tab:question_patterns}). 
+
+\end{enumerate}
+
+The question patterns were created based on the results obtained in the pre-processing file of the SwDA Corpus. Constructing proper questions was especially challenging with respect to the feature names containing a verb, given that it had to be in the third person singular form in order make the question syntactically coherent. To access the third person singular form we made use of the Pattern library (citation), a useful natural language processing library for Python which contains a function, namely lexeme, that provides all lexeme forms for a given word, in our case a verb. This is exactly what we needed in order to generate proper questions for feature names containing a verb. 
+
+\begin{table*}[ht]
+\centering
+\begin{center}
+{\small \texttt{
+	\begin{tabularx}{\linewidth}{cLLLLL} 
+		\toprule
+		 & VERB (+ed), ADJ, ADV & NOUN (pl), DET & NOUN (sg) & VERB, AUX & ADP \\ \midrule
+		biased & "Your animal is \{feat\}, isn’t it?" & "Your animal has \{feat\}, doesn't it?" & "Your animal is a/an \{feat\}, isn't it?" & "Your animal \{feat\}, doesn't it?" & "Your animal lives \{feat\}, doesn't it?"  \\ 
+		non-biased & "Is your animal \{feat\}?" & "Does your animal have \{feat\}?" & "Is your animal a/an \{feat\}?" & “Does your animal \{feat\}?" & "Does your animal live \{feat\}?" \\
+		\bottomrule
+	\end{tabularx}
+}}
+\end{center}
+\caption{Question patterns based on bias status and POS tag.}
+\label{tab:question_patterns}
+\end{table*}
+
 
 \subsection{Incorporating out-of-database objects}
 \label{subsec:out-of-db}
@@ -330,9 +404,7 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 ``the perceived world is not an unstructured total set of equiprobable co-occurring attributes. Rather, the material objects of the world are perceived to possess (in Garner's 1974, sense) high correlational structure.
 That is, given a knower who perceives the complex attributes of feathers, fur, and wings, it is an empirical fact provided by the perceived world that wings co-occur with feathers more than with fur'' \citep[29]{Rosch1978}
 
-\vspace{\baselineskip}
-
-\noindent The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
+The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the functions in the \texttt{TwentyQuestions} class fit together.
 
 \begin{figure*}
 	\includegraphics[width=.9\linewidth]{graphics/call_graph.pdf}
@@ -347,11 +419,11 @@ That is, given a knower who perceives the complex attributes of feathers, fur, a
 
 \subsection{Win/loss rate}
 
-\hl{[RODRIGO]}
+\hl{[?]}
 
 \subsection{Quality of interpolated out-of-database items}
 
-\hl{[RODRIGO]}
+\hl{[?]}
 
 \section{Limitations}
 \label{sec:limit}
@@ -380,12 +452,12 @@ All group members were in regular, active communication about ideas and directio
 It was a fully collaborative effort throughout.
 We summarise here how we divided the workload between the four of us.
 
-\paragraph{Wellesley} Literature work, prepared and held the in-class presentation, researched GUI and online server options, wrote and proofread sections of the project plan and the final paper.
+\paragraph{Wellesley} Literature work, prepared and held the in-class presentation, wrote and proofread sections of the project plan and the final paper.
 
 \paragraph{Anna} Literature work, implemented the question generation, wrote sections of the project plan and the final paper.
 
-\paragraph{Rodrigo} Implemented the handling of out-of-database items, conducted the evaluation, wrote sections of the final paper.
+\paragraph{Rodrigo} Implemented the handling of out-of-database items, wrote sections of the final paper.
 
-\paragraph{Elizabeth} Implemented the \texttt{TwentyQuestions} class and its core methods, wrote and proofread sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
+\paragraph{Elizabeth} Implemented the \texttt{TwentyQuestions} class and its core methods, wrote sections of the project plan and the final paper, hosted the GitHub repo, compiled \LaTeX\ files.
 
 \end{document}
