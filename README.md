@@ -15,9 +15,9 @@ If the animal you chose isn't in its knowledge base, the system will add it in, 
 
 ## Setup
 
-To run this project, you need Python 3 and the libraries `en_core_web_sm`, `numpy`, `os`, `pandas`, and `spacy`.
+To run this script, you need Python 3 and the libraries `en_core_web_sm`, `numpy`, `os`, `pandas`, and `spacy`.
 
-To install `en_core_web_sm` in Anaconda, try running the following.
+To install `en_core_web_sm` in Anaconda, execute the following:
 
 ```
 conda install -c conda-forge space-model-en_core_web_sm
@@ -31,4 +31,10 @@ Begin by cloning this repository.
 git clone https://github.com/epankratz/twenty-questions
 ```
 
-lorem ipsum
+Now, navigate into the directory `twenty-questions/code/`.
+To play on the command line, simply run the following command.
+(It will take a few seconds to initialise, but then the fun will begin!)
+
+```
+python 20q.py
+```
