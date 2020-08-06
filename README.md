@@ -41,4 +41,4 @@ To play on the command line, start up your interactive Python shell, and then ex
 
 To play more than once, you can re-run `TQ.game.play()` as many times as you'd like.
 
-(Importing the module will take a few seconds to initialise as all the libraries are loaded, but then the fun will begin!)
+(Importing the module will take a few seconds while all the libraries are loaded, but then the fun can begin!)
