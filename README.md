@@ -32,10 +32,13 @@ git clone https://github.com/epankratz/twenty-questions
 ```
 
 Now, navigate into the directory `twenty-questions/code/`.
-To play on the command line, simply run the following command.
+To play on the command line, start up your interactive Python shell, and then execute the following commands.
 
 ```
-python 20q.py
+>>> import TwentyQuestions as TQ
+>>> TQ.game.play()
 ```
 
-(It will take a few seconds to initialise as all the libraries are loaded, but then the fun will begin!)
+And, to play again, simply re-run `TQ.game.play()` as many times as you'd like.
+
+(Importing the module will take a few seconds to initialise as all the libraries are loaded, but then the fun will begin!)
