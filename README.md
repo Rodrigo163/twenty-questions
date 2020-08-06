@@ -33,8 +33,9 @@ git clone https://github.com/epankratz/twenty-questions
 
 Now, navigate into the directory `twenty-questions/code/`.
 To play on the command line, simply run the following command.
-(It will take a few seconds to initialise, but then the fun will begin!)
 
 ```
 python 20q.py
 ```
+
+(It will take a few seconds to initialise as all the libraries are loaded, but then the fun will begin!)
