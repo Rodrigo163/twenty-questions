@@ -807,5 +807,4 @@ class TwentyQuestions():
         self.play()
 
 
-twq = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = True)
-twq.play()
+game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = True)
