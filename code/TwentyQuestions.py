@@ -531,6 +531,9 @@ class TwentyQuestions():
         """
         #======================================
 
+        # EP ADDED
+        print(self.answers)
+
         #Swallowing pride
         print('Dangit, you were too smart for me!')
 
@@ -807,4 +810,4 @@ class TwentyQuestions():
         self.play()
 
 
-game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = True)
+game = TwentyQuestions(kn_file_name = 'knowledge_base_eval.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
