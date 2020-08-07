@@ -699,6 +699,7 @@ class TwentyQuestions():
         self.X = self.kn.loc[:, self.kn.columns != 'animal']
         self.counter = 1
         self.answers = dict()
+        self.y = self.kn['animal']
         self.y_probdist = pd.DataFrame(self.y)
         self.y_probdist['prob'] = np.repeat(20, len(self.y))
         self.y_probdist = self.y_probdist.set_index('animal')['prob']
