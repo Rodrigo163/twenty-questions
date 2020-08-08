@@ -23,6 +23,8 @@ class TwentyQuestions():
         self.kn = pd.read_csv(self.kn_file_name)
 
         self.y = self.kn['animal']
+        self.new_row = 0
+        self.temp = 0
         self.X = self.kn.loc[:, self.kn.columns != 'animal']
         self.counter = 1
         self.answers = dict()
@@ -502,7 +504,7 @@ class TwentyQuestions():
         """
         return np.sum(x==y)
 
-    def sim_argmax(self, new_row):
+    def sim_argmax(self):
         """
         Using correlation between rows to measure similarity and retrieve index and most similar row
 
@@ -511,8 +513,8 @@ class TwentyQuestions():
         Returns:
             The index of the argmax and it's similarity value
         """
-        # new_row = pd.Series(data = new_row[1:], index = self.kn.set_index('animal').columns)
-        corrs = np.asarray(self.kn.set_index('animal').corrwith(new_row, axis = 1))
+        self.new_row = pd.Series(data = self.new_row[1:], index = self.kn.set_index('animal').columns)
+        corrs = np.asarray(self.kn.set_index('animal').corrwith(self.new_row, axis = 1))
         #getting argmax
         argmax = np.argmax(np.abs(corrs))
         return argmax, corrs[argmax]
@@ -560,14 +562,14 @@ class TwentyQuestions():
 
             #temporary array to keep the updated row
             correct_answer_index = np.where(self.y==correct_answer)[0][0]
-            new_row = self.kn.iloc[[correct_answer_index]].copy()
+            self.new_row = self.kn.iloc[[correct_answer_index]].copy()
 
             #update process
             for attribute, value in self.answers.items():
                 if type(value) != str: #making sure to not compare the animal name
-                    if (value == new_row[attribute]).bool() == False: #diff than in our KB
-                                new_row[attribute] = value
-            self.kn = self.kn.append(new_row, ignore_index=True)
+                    if (value == self.new_row[attribute]).bool() == False: #diff than in our KB
+                                self.new_row[attribute] = value
+            self.kn = self.kn.append(self.new_row, ignore_index=True)
 
             #adding result to stats
             new_stats_row = pd.DataFrame({'n_questions':[self.counter-1], 'result':[1]})
@@ -583,78 +585,78 @@ class TwentyQuestions():
             if self.sim_measure == 'ours':
 
                 #blank new row
-                new_row = []
+                self.new_row = []
 
                 #filling in the new row
                 for i, attribute in enumerate(self.kn.columns, 0):
                     if attribute in self.answers.keys(): #knowledge provided by the user
-                        new_row.append(self.answers[attribute])
+                        self.new_row.append(self.answers[attribute])
                     else:
-                        new_row.append(993993)
+                        self.new_row.append(993993)
 
                 #using our similarity measure
                 #we convert to np array and delete the first value with the string 'animal'
                 rows = [np.asarray(self.kn.iloc[i].copy())[1:] for i in range(self.kn.shape[0])]
 
                 #here we store the similarity counts between our new row and every other row in our KB
-                sim_counts = [self.our_similarity(rows[i], new_row) for i in range(len(rows))]
+                sim_counts = [self.our_similarity(rows[i], self.new_row) for i in range(len(rows))]
 
                 #retrieving the row index corresponding to the animal with the highest similarity and retrieving that row
                 most_similar_index = np.argmax(sim_counts)
                 most_similar_row = self.kn.iloc[most_similar_index].copy()
 
                 #second round filling in the new row with the missing features coming from the most similar existing row
-                new_row = []
+                self.new_row = []
 
                 for i, attribute in enumerate(self.kn.columns, 0):
                     if attribute in self.answers.keys(): #knowledge provided by the user
-                        new_row.append(self.answers[attribute])
+                        self.new_row.append(self.answers[attribute])
                     else:
                         #for the features that were not provided by the user we will use our similarity measure to interpolate the missing values from the most similar row.
-                        new_row.append(most_similar_row[i])
+                        self.new_row.append(most_similar_row[i])
 
-            else:
+            elif self.sim_measure == 'corr':
                 #blank new row
-                new_row = []
+                self.new_row = []
 
                 #filling in the new row
                 for i, attribute in enumerate(self.kn.columns, 0):
                     if attribute in self.answers.keys(): #knowledge provided by the user
-                        new_row.append(self.answers[attribute])
+                        self.new_row.append(self.answers[attribute])
                     else:
-                        new_row.append(993993)
-
+                        self.new_row.append(993993)
+                self.temp = self.new_row
                 #using pandas correlation between rows to retrieve similarities
-                most_similar_index, value = self.sim_argmax(new_row)
+                most_similar_index, value = self.sim_argmax()
                 most_similar_row = self.kn.iloc[most_similar_index].copy()
                 if value >0:
                     #positive correlation so we'll copy the values from the most similar row
                     #second round filling in the new row with the missing features coming from the most similar existing row
-                    new_row = []
+                    self.new_row = []
 
                     for i, attribute in enumerate(self.kn.columns, 0):
                         if attribute in self.answers.keys(): #knowledge provided by the user
-                            new_row.append(self.answers[attribute])
+                            self.new_row.append(self.answers[attribute])
                         else:
                             #for the features that were not provided by the user we will use our similarity measure to interpolate the missing values from the most similar row.
-                            new_row.append(most_similar_row[i])
+                            self.new_row.append(most_similar_row[i])
                 elif value <= 0:
                     #negative correlation so we'll invert the values from the most different row
-                    new_row = []
+                    self.new_row = []
 
                     for i, attribute in enumerate(self.kn.columns, 0):
                         if attribute in self.answers.keys(): #knowledge provided by the user
-                            new_row.append(self.answers[attribute])
+                            self.new_row.append(self.answers[attribute])
                         else:
                             #for the features that were not provided by the user we will use our similarity measure to interpolate the missing values from the most similar row.
                             new_val = 0 if most_similar_row[i]==1 else 1
-                            new_row.append(new_val)
+                            self.new_row.append(new_val)
 
 
             #adding it to the KN
             final = dict()
             for i, at in enumerate(self.kn.columns, 0):
-                final[at] = new_row[i]
+                final[at] = self.new_row[i]
             self.kn = self.kn.append(final, ignore_index=True)
 
             #updating stats
@@ -809,6 +811,5 @@ class TwentyQuestions():
         self.counter += 1
 
         self.play()
-
 
 game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
