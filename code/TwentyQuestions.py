@@ -494,7 +494,7 @@ class TwentyQuestions():
     # ====================================================
     #Auxiliary functions for the endgame_lose phase:
 
-    def our_similarity(self, x, y):
+    def sim_ours(x, y):
         """
         This function will count how many values x and y have in common
         Arg:
@@ -502,7 +502,15 @@ class TwentyQuestions():
         Returns:
             Count of common features
         """
-        return np.sum(x==y)
+        li = []
+
+        for i, el in enumerate(x):
+            if el == y[i]:
+                li.append(1)
+            else:
+                li.append(0)
+
+        return sum(li)
 
     def sim_argmax(self):
         """
@@ -599,7 +607,7 @@ class TwentyQuestions():
                 rows = [np.asarray(self.kn.iloc[i].copy())[1:] for i in range(self.kn.shape[0])]
 
                 #here we store the similarity counts between our new row and every other row in our KB
-                sim_counts = [self.our_similarity(rows[i], self.new_row) for i in range(len(rows))]
+                sim_counts = [self.sim_ours(rows[i], self.new_row) for i in range(len(rows))]
 
                 #retrieving the row index corresponding to the animal with the highest similarity and retrieving that row
                 most_similar_index = np.argmax(sim_counts)
@@ -686,7 +694,7 @@ class TwentyQuestions():
 
     def quick_endgame_lose(self):
         """
-        Quick version of the loosing case for prototyping.
+        Quick version of the losing case for prototyping.
         """
         print('dangit')
 
@@ -811,5 +819,4 @@ class TwentyQuestions():
         self.counter += 1
 
         self.play()
-
 game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
