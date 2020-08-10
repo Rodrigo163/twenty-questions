@@ -8,6 +8,10 @@ import numpy as np
 import os
 import spacy
 import en_core_web_sm
+from lemminflect import getInflection 
+
+#to install lemminflect please run the following line
+#!pip3 install lemminflect
 
 nlp = en_core_web_sm.load()
 
@@ -334,24 +338,21 @@ class TwentyQuestions():
         feat_name = feat_name.replace("_"," ") # replace all underscores by blank spaces
         word = feat_name.partition(" ") # splits into a 3-tuple at first space, e.g. ('has', ' ', 'many good friends')
 
-        # convert feature into SpaCy doc (i.e. sequence of tokens)
+        # convert feature into spaCy doc (i.e. sequence of tokens)
         doc = nlp(feat_name)
-        # print("FEATURE:", doc)
-
+    
         # The question type is decided based on the POS of the first word in the feature name
         first_token = doc[0]
         token_pos = first_token.pos_
-        # print('POS:', token_pos)
 
         # BIASED POSITIVE QUESTIONS: "Your animal has wings, doesn't it?"
         if majority_val == 1 and extremeness > bias_threshold:
-            # print('BIASED QUESTION')
-
+            
             # Participles, adjectives, adverbs
             if (token_pos == "VERB" and feat_name[-2:] == "ed") or token_pos == "ADJ" or token_pos == "ADV":
                 question = f"Your animal is {feat_name}, isn't it?"
 
-            # Plural nouns, nouns preceded by determiner
+            # Plural nouns, nouns preceded by determiner or numeral 
             elif (token_pos == "NOUN" and feat_name[-1] == "s") or token_pos == "DET" or token_pos == 'NUM':
                 question = f"Your animal has {feat_name}, doesn't it?"
 
@@ -361,20 +362,16 @@ class TwentyQuestions():
                     question = f"Your animal is an {feat_name}, isn't it?"
                 else:
                     question = f"Your animal is a {feat_name}, isn't it?"
-
+                    
             # Verbs: Third person singular, distinction of multiple-element feat_names and single-element feat_names
-            # and auxiliaries, i.e. possessive 'has'
-            elif token_pos == "VERB":
+            # and auxiliaries (i.e. 'have')
+            elif token_pos == "VERB" or token_pos == "AUX":
                 if word[2] != "": # if feat_name consists of more than 1 word
-#                     question = f"Your animal {lexeme(first_token)[1]} {word[2]}, doesn't it?"
-                    ## lexeme() is a terrible generator that always crashes on the first run-through but works fine after :(
-                    question = f"Your animal {str(first_token)+'s'} {word[2]}, doesn't it?"
+                    # getInflection gives third person singular form of verb
+                    question = f"Your animal {(getInflection(str(first_token), tag='VBZ')[0])} {word[2]}, doesn't it?"
+                
                 else: # if feat_name consists of only 1 word
-                    question = f"Your animal {str(first_token)+'s'}, doesn't it?"
-
-            # Auxiliaries (i.e. 'have')
-            elif token_pos == 'AUX':
-                question = f"Your animal has {word[2]}, doesn't it?"
+                    question = f"Your animal {(getInflection(str(first_token), tag='VBZ')[0])}, doesn't it?"
 
             # Adpositions
             elif token_pos == "ADP":
@@ -387,8 +384,7 @@ class TwentyQuestions():
 
         # NON-BIASED QUESTION: "Does your animal have wings?"
         else:
-            # print('UNBIASED QUESTION')
-
+            
             if (token_pos == "VERB" and feat_name[-2:]== "ed") or token_pos == "ADJ" or token_pos == "ADV":
                 question = f"Is your animal {feat_name}?"
 
@@ -401,11 +397,8 @@ class TwentyQuestions():
                 else:
                     question = f"Is your animal a {feat_name}?"
 
-            elif token_pos == 'AUX':
-                question = f'Does your animal have {word[2]}?'
-
-            elif token_pos == "VERB":
-                question = f"Does your animal {feat_name}?"
+            elif token_pos == "VERB" or token_pos == "AUX":
+                question = f'Does your animal {feat_name}?'
 
             elif token_pos == "ADP":
                 question = f"Does your animal live {feat_name}?"
@@ -819,4 +812,5 @@ class TwentyQuestions():
         self.counter += 1
 
         self.play()
+        
 game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
