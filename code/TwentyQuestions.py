@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#.py version of our class code.
-
 import pandas as pd
 import numpy as np
 import os
 import spacy
 import en_core_web_sm
-from lemminflect import getInflection 
-
-#to install lemminflect please run the following line
-#!pip3 install lemminflect
+from lemminflect import getInflection
 
 nlp = en_core_web_sm.load()
 
@@ -59,11 +54,9 @@ class TwentyQuestions():
         self.y_probdist = self.y_probdist.set_index('animal')['prob']
 
         # Records which features are subjective, rather subjective, and objective (we will ask about objective features first).
-        self.subj_feats = ['furry', 'smelly', 'smart', 'a_long_life', 'fast', 'slow', 'useful_to_humans', 'sleep_a_lot',
-                           'dangerous']
-        self.rather_subj_feats = ['have_hair', 'predator', 'venomous', 'type_of_pet', 'black', 'white-colored', 'blue-colored', 'a_brown_color', 'gray-colored', 'spots',                                   'hooves', 'paws', 'in_a_group', 'endangered', 'on_a_farm', 'in_safari_areas', 'in_the_ocean',                                   'commonly_eaten', 'bigger_than_a_microwave']
-        self.obj_feats = ['feathers', 'produce_eggs', 'produce_milk', 'fly', 'swim', 'have_teeth', 'have_a_backbone', 'take_breaths', 'fins', 'zero_legs',                           'two_legs', 'four_legs', 'five_legs', 'six_legs', 'eight_legs', 'have_a_tail', 'type_of_mammal', 'type_of_bird', 'reptile', 'type_of_fish',                           'type_of_amphibian', 'type_of_insect', 'pink-colored', 'black_and_white', 'orange-colored', 'red', 'green', 'yellow', 'stripes',
-                          'horns_or_antlers', 'have_tusks', 'active_mainly_at_night', 'have_a_shell', 'sting', 'in_a_cold_climate']
+        self.subj_feats = ['furry', 'smelly', 'smart', 'a_long_life', 'fast', 'slow', 'useful_to_humans', 'sleep_a_lot', 'dangerous']
+        self.rather_subj_feats = ['have_hair', 'predator', 'venomous', 'type_of_pet', 'black', 'white-colored', 'blue-colored', 'a_brown_color', 'gray-colored', 'spots', 'hooves', 'paws', 'in_a_group', 'endangered', 'on_a_farm', 'in_safari_areas', 'in_the_ocean', 'commonly_eaten', 'bigger_than_a_microwave']
+        self.obj_feats = ['feathers', 'produce_eggs', 'produce_milk', 'fly', 'swim', 'have_teeth', 'have_a_backbone', 'take_breaths', 'fins', 'zero_legs', 'two_legs', 'four_legs', 'five_legs', 'six_legs', 'eight_legs', 'have_a_tail', 'type_of_mammal', 'type_of_bird', 'reptile', 'type_of_fish', 'type_of_amphibian', 'type_of_insect', 'pink-colored', 'black_and_white', 'orange-colored', 'red', 'green', 'yellow', 'stripes', 'horns_or_antlers', 'have_tusks', 'active_mainly_at_night', 'have_a_shell', 'sting', 'in_a_cold_climate']
 
     # ====================================================
     # Utility functions to describe some objects and debug
@@ -124,7 +117,6 @@ class TwentyQuestions():
         Ranks the features in X in ascending order of abs(1-SCR) and filters out those that contain either all 0s or all 1s
         (i.e. those that cannot be used to distinguish between objects).
 
-        Arg:
         Returns:
             A pandas series of features ranked by abs(1-SCR) ascending, with non-distinguishing features removed.
         """
@@ -137,7 +129,6 @@ class TwentyQuestions():
         """
         Ranks all features in df by their increasing absolute distance from 1 of the SCR.
 
-        Arg:
         Returns:
             A pandas series of features ranked by abs(1-SCR) ascending
         """
@@ -200,7 +191,6 @@ class TwentyQuestions():
         an unbiased question or a biased question.
 
         Args:
-            X: pandas dataframe with features as columns, populated by 0s and 1s, one row per instance
             feature: a string, the feature we care about.
         Returns:
             majority: integer, 0 or 1, representing majority value for the given feature
@@ -258,6 +248,7 @@ class TwentyQuestions():
             feature: a string, a column in df
             answ: integer in 0, 1, 2 representing the user's answer
         Returns:
+            Nothing.
         """
         # Add answer to the answers database
         self.answers[feature] = answ
@@ -295,6 +286,7 @@ class TwentyQuestions():
             feature_asked: a string, the feature just asked about
             answ: an integer, the user's response
         Returns:
+            Nothing.
         """
 
         # Set the index of kn to the animal column for easy combination with the probability distribution.
@@ -340,19 +332,19 @@ class TwentyQuestions():
 
         # convert feature into spaCy doc (i.e. sequence of tokens)
         doc = nlp(feat_name)
-    
+
         # The question type is decided based on the POS of the first word in the feature name
         first_token = doc[0]
         token_pos = first_token.pos_
 
         # BIASED POSITIVE QUESTIONS: "Your animal has wings, doesn't it?"
         if majority_val == 1 and extremeness > bias_threshold:
-            
+
             # Participles, adjectives, adverbs
             if (token_pos == "VERB" and feat_name[-2:] == "ed") or token_pos == "ADJ" or token_pos == "ADV":
                 question = f"Your animal is {feat_name}, isn't it?"
 
-            # Plural nouns, nouns preceded by determiner or numeral 
+            # Plural nouns, nouns preceded by determiner or numeral
             elif (token_pos == "NOUN" and feat_name[-1] == "s") or token_pos == "DET" or token_pos == 'NUM':
                 question = f"Your animal has {feat_name}, doesn't it?"
 
@@ -362,14 +354,14 @@ class TwentyQuestions():
                     question = f"Your animal is an {feat_name}, isn't it?"
                 else:
                     question = f"Your animal is a {feat_name}, isn't it?"
-                    
+
             # Verbs: Third person singular, distinction of multiple-element feat_names and single-element feat_names
             # and auxiliaries (i.e. 'have')
             elif token_pos == "VERB" or token_pos == "AUX":
                 if word[2] != "": # if feat_name consists of more than 1 word
                     # getInflection gives third person singular form of verb
                     question = f"Your animal {(getInflection(str(first_token), tag='VBZ')[0])} {word[2]}, doesn't it?"
-                
+
                 else: # if feat_name consists of only 1 word
                     question = f"Your animal {(getInflection(str(first_token), tag='VBZ')[0])}, doesn't it?"
 
@@ -384,7 +376,7 @@ class TwentyQuestions():
 
         # NON-BIASED QUESTION: "Does your animal have wings?"
         else:
-            
+
             if (token_pos == "VERB" and feat_name[-2:]== "ed") or token_pos == "ADJ" or token_pos == "ADV":
                 question = f"Is your animal {feat_name}?"
 
@@ -419,7 +411,6 @@ class TwentyQuestions():
         To be used once the dataset cannot be split by features anymore but multiple objects still remain.
         Guesses objects in order of descending probability.
 
-        Args:
         Returns:
             Nothing.
         """
@@ -674,7 +665,7 @@ class TwentyQuestions():
 
     def endgame_win(self):
         """
-            Handles the case in which we guess correctly the user's animal, updates the stats file and saves progress.
+        Handles the case in which we guess correctly the user's animal, updates the stats file and saves progress.
         """
         print('Oh yeah! I rock')
         new_stats_row = pd.DataFrame({'n_questions':[self.counter-1], 'result':[0]})
@@ -723,7 +714,7 @@ class TwentyQuestions():
         # BASE CASE 0: counter > 20
         # -----------------------------
         if self.counter > 20:
-            print('TOO MANY QUESTIONS!')
+#             print('TOO MANY QUESTIONS!')
             self.quick_endgame_lose() if self.quick_endgame else self.endgame_lose()
             return
 
@@ -733,7 +724,7 @@ class TwentyQuestions():
         # -----------------------------
 
         if len(self.X) == 1:
-            print('ONLY ONE OBJECT LEFT!')
+#             print('ONLY ONE OBJECT LEFT!')
             self.guess_objs_from_probdist()  # includes endgame
             return
 
@@ -743,7 +734,7 @@ class TwentyQuestions():
         # -----------------------------
 
         if len(self.X.columns) == 1:
-            print('ONLY ONE FEATURE LEFT!')
+#             print('ONLY ONE FEATURE LEFT!')
             feature_to_split_on = self.X.columns[0]
             majority_val, extremeness = self.get_majority_value_and_extremeness(feature_to_split_on)
             answ = self.ask_and_get_answer(feature_to_split_on, majority_val, extremeness)
@@ -752,7 +743,7 @@ class TwentyQuestions():
 
             # If there are no remaining objects to guess after splitting the data on this feature, then endgame_lose().
             if len(self.X.index) == 0:
-                print('NO OBJECTS LEFT TO GUESS!')
+#                 print('NO OBJECTS LEFT TO GUESS!')
                 self.quick_endgame_lose() if self.quick_endgame else self.endgame_lose()
                 return
             # Otherwise, cycle through all remaining objects until endgame.
@@ -770,7 +761,7 @@ class TwentyQuestions():
         # Count the distinguishing features in X (i.e. those that aren't all 0s or all 1s) and cycle through objects
         # if there are none.
         if len( disting_feats ) == 0:
-            print('NO MORE DISTINGUISHING FEATURES!')
+#             print('NO MORE DISTINGUISHING FEATURES!')
             self.guess_objs_from_probdist()  # includes endgame
             return
 
@@ -812,5 +803,5 @@ class TwentyQuestions():
         self.counter += 1
 
         self.play()
-        
+
 game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
