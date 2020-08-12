@@ -11,11 +11,11 @@ Developed by **Wellesley Boboc, Anna-Janina Goecke, Rodrigo Lopez Portillo Alcoc
 You think of an animal, and our 20 Questions player will try to guess which animal you're thinking of.
 If the animal you chose isn't in its knowledge base, the system will add it in using the information you've provided, and it will automatically fill in all the blanks that remain. 
 
-(gif of frontend, either command line or GUI)
+![](20q.gif)
 
 ## Setup
 
-To run this script, you need Python 3 and the libraries `en_core_web_sm`, `numpy`, `os`, `pandas`, and `spacy`.
+To run this script, you need Python 3 and the libraries `en_core_web_sm`, `lemminflect`, `numpy`, `os`, `pandas`, and `spacy`.
 
 To install `en_core_web_sm` in Anaconda, execute the following (more info on [anaconda.org](https://anaconda.org/conda-forge/spacy-model-en_core_web_sm)):
 
