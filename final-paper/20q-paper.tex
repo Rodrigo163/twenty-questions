@@ -504,11 +504,11 @@ Now that the templates are in place, the QG proceeds according to the following 
 
 We did face some challenges with Step 2 during development.
 Specifically, spaCy's POS tagger didn't correctly tag all of our features, resulting in some ungrammatical questions.
-For instance, it would tag the feature \texttt{fly} only as a noun, not a verb, and \texttt{nocturnal} as a proper noun, for some reason, and not an adjective.
+For instance, it would tag \texttt{nocturnal} only as a proper noun, for some reason, and not an adjective.
 We also tried WordNet's POS tagger \citep{Fellbaum2010}, but it still had poor accuracy with our feature names. 
 Presumably, these problems can be attributed to the fact that we used out-of-context tagging.
 
-We ultimately decided that the best solution would be to simply rename the mis-tagged features (e.g.\ changing \texttt{fly} to \texttt{the\_ability\_to\_fly}, giving ``Does your animal have the ability to fly?'', and \texttt{nocturnal} to \texttt{active\_mainly\_at\_night}, giving ``Is your animal active mainly at night?'').
+We ultimately decided that the best solution would be to simply rename the mis-tagged features (e.g.\ changing \texttt{nocturnal} to \texttt{active\_mainly\_at\_night}, which would be correctly tagged as an adjective, giving ``Is your animal active mainly at night?'').
 
 % ==============================================
 \subsection{Incorporating out-of-database objects}

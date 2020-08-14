@@ -58,6 +58,7 @@ class TwentyQuestions():
         self.rather_subj_feats = ['have_hair', 'predator', 'venomous', 'type_of_pet', 'black', 'white-colored', 'blue-colored', 'a_brown_color', 'gray-colored', 'spots', 'hooves', 'paws', 'in_a_group', 'endangered', 'on_a_farm', 'in_safari_areas', 'in_the_ocean', 'commonly_eaten', 'bigger_than_a_microwave']
         self.obj_feats = ['feathers', 'produce_eggs', 'produce_milk', 'fly', 'swim', 'have_teeth', 'have_a_backbone', 'take_breaths', 'fins', 'zero_legs', 'two_legs', 'four_legs', 'five_legs', 'six_legs', 'eight_legs', 'have_a_tail', 'type_of_mammal', 'type_of_bird', 'reptile', 'type_of_fish', 'type_of_amphibian', 'type_of_insect', 'pink-colored', 'black_and_white', 'orange-colored', 'red', 'green', 'yellow', 'stripes', 'horns_or_antlers', 'have_tusks', 'active_mainly_at_night', 'have_a_shell', 'sting', 'in_a_cold_climate']
 
+
     # ====================================================
     # Utility functions to describe some objects and debug
     # ====================================================
@@ -110,7 +111,6 @@ class TwentyQuestions():
     # The following methods are for sampling the feature to ask about in each stage of the game, based on the
     # split cardinality ratio.
     # ====================================================
-
 
     def get_distinguishing_feats(self):
         """
@@ -410,9 +410,6 @@ class TwentyQuestions():
         """
         To be used once the dataset cannot be split by features anymore but multiple objects still remain.
         Guesses objects in order of descending probability.
-
-        Returns:
-            Nothing.
         """
         # Sort values descending, so the highest-probability animals are first.
         self.y_probdist.sort_values(ascending=False, inplace=True)
@@ -499,11 +496,6 @@ class TwentyQuestions():
     def sim_argmax(self):
         """
         Using correlation between rows to measure similarity and retrieve index and most similar row
-
-        Arg:
-            The new row that we will compare to every pre-existing row
-        Returns:
-            The index of the argmax and it's similarity value
         """
         self.new_row = pd.Series(data = self.new_row[1:], index = self.kn.set_index('animal').columns)
         corrs = np.asarray(self.kn.set_index('animal').corrwith(self.new_row, axis = 1))
@@ -519,14 +511,8 @@ class TwentyQuestions():
         First it asks for the correct answer. If the correct answer was already in the dataset, it will create a new row combining the given answers and the existing data on that animal.
         If the correct answer was not on the dataset, it will create a new row taking into account the answers provided by the user and the most similar pre-existing animal on the database.
         After adding this new information to the kb, it will update the stats file and save the game's progress.
-        Arg:
-
-        Returns:
         """
         #======================================
-
-        # EP ADDED
-        print(self.answers)
 
         #Swallowing pride
         print('Dangit, you were too smart for me!')
@@ -569,7 +555,6 @@ class TwentyQuestions():
 
         #if correct answer is not yet in our dataset
         else:
-
 
             #retrieving the row that is already in our KB with the highest similarity to the answers provided by the user.
             #if there is a tie, we will simply grab the values from the first row having this similarity maximum value.
@@ -662,7 +647,6 @@ class TwentyQuestions():
         # Resetting game-dependent variables so we can play again.
         self.reset_game()
 
-
     def endgame_win(self):
         """
         Handles the case in which we guess correctly the user's animal, updates the stats file and saves progress.
@@ -675,16 +659,13 @@ class TwentyQuestions():
         # Resetting game-dependent variables so we can play again.
         self.reset_game()
 
-
     def quick_endgame_lose(self):
         """
         Quick version of the losing case for prototyping.
         """
         print('dangit')
-
         # Resetting game-dependent variables so we can play again.
         self.reset_game()
-
 
     def reset_game(self):
         """
@@ -697,7 +678,6 @@ class TwentyQuestions():
         self.y_probdist = pd.DataFrame(self.y)
         self.y_probdist['prob'] = np.repeat(20, len(self.y))
         self.y_probdist = self.y_probdist.set_index('animal')['prob']
-
 
 
     # ====================================================
@@ -713,8 +693,8 @@ class TwentyQuestions():
         # -----------------------------
         # BASE CASE 0: counter > 20
         # -----------------------------
+
         if self.counter > 20:
-#             print('TOO MANY QUESTIONS!')
             self.quick_endgame_lose() if self.quick_endgame else self.endgame_lose()
             return
 
@@ -724,7 +704,6 @@ class TwentyQuestions():
         # -----------------------------
 
         if len(self.X) == 1:
-#             print('ONLY ONE OBJECT LEFT!')
             self.guess_objs_from_probdist()  # includes endgame
             return
 
@@ -734,7 +713,6 @@ class TwentyQuestions():
         # -----------------------------
 
         if len(self.X.columns) == 1:
-#             print('ONLY ONE FEATURE LEFT!')
             feature_to_split_on = self.X.columns[0]
             majority_val, extremeness = self.get_majority_value_and_extremeness(feature_to_split_on)
             answ = self.ask_and_get_answer(feature_to_split_on, majority_val, extremeness)
@@ -743,7 +721,6 @@ class TwentyQuestions():
 
             # If there are no remaining objects to guess after splitting the data on this feature, then endgame_lose().
             if len(self.X.index) == 0:
-#                 print('NO OBJECTS LEFT TO GUESS!')
                 self.quick_endgame_lose() if self.quick_endgame else self.endgame_lose()
                 return
             # Otherwise, cycle through all remaining objects until endgame.
@@ -761,7 +738,6 @@ class TwentyQuestions():
         # Count the distinguishing features in X (i.e. those that aren't all 0s or all 1s) and cycle through objects
         # if there are none.
         if len( disting_feats ) == 0:
-#             print('NO MORE DISTINGUISHING FEATURES!')
             self.guess_objs_from_probdist()  # includes endgame
             return
 
@@ -776,7 +752,6 @@ class TwentyQuestions():
         # or IndexError is raised, there aren't any more objective features in disting_feats.
         try:
             disting_feats_obj = disting_feats.reindex(self.obj_feats).sort_values().dropna()
-#             print('SAMPLING AN OBJECTIVE FEATURE')
             feature_to_split_on = self.sample_feature(disting_feats_obj)
         except:
 
@@ -784,19 +759,16 @@ class TwentyQuestions():
             # subjective features in disting_feats either.
             try:
                 disting_feats_rathersubj = disting_feats.reindex(self.rather_subj_feats).sort_values().dropna()
-#                 print('SAMPLING A "RATHER SUBJECTIVE" FEATURE')
                 feature_to_split_on = self.sample_feature(disting_feats_rathersubj)
 
             # Would finally need to look at the truly subjective features.
             except:
                 disting_feats_subj = disting_feats.reindex(self.subj_feats).sort_values().dropna()
-#                 print('SAMPLING A SUBJECTIVE FEATURE')
                 feature_to_split_on = self.sample_feature(disting_feats_subj)
 
-#         # OLD VERSION: Doesn't worry about objective/subjective features; just chooses one and splits on it.
-#         feature_to_split_on = self.sample_feature(disting_feats)
+        # OLD VERSION: Doesn't worry about objective/subjective features; just chooses one and splits on it.
+        # feature_to_split_on = self.sample_feature(disting_feats)
 
-        # print('FEAT:', feature_to_split_on)
         majority_val, extremeness = self.get_majority_value_and_extremeness(feature_to_split_on)
         answ = self.ask_and_get_answer(feature_to_split_on, majority_val, extremeness)
         self.process_answer(feature_to_split_on, answ)
@@ -804,4 +776,5 @@ class TwentyQuestions():
 
         self.play()
 
-game = TwentyQuestions(kn_file_name = 'knowledge_base.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
+
+game = TwentyQuestions(kn_file_name = 'knowledge_base_original.csv', stats_file_name='gameplay_stats.csv', quick_endgame = False)
