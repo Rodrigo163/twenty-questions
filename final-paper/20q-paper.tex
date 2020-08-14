@@ -17,6 +17,9 @@
 \usepackage{soul}
 \usepackage{csquotes}
 \usepackage{multirow}
+\usepackage{lingmacros}
+\usepackage{float}
+\restylefloat{table}
 
 \usepackage{tabularx}
     \newcolumntype{L}{>{\raggedright\arraybackslash}X}
@@ -170,23 +173,14 @@ In addition to an interesting implementation, this paper also presents an intrig
 \label{subsec:qglit}
 % ==============================================
 
-% ELIZABETH TODO:
-% - smooth out intro paragraph
-% - put rule-based sources first
-% - then end with template ones (Zerr etc.)
+We turn now to existing approaches to question generation (QG).
+The method that we will focus on in particular are rules- and template-based approaches, since this is what we will use in our implementation.
+We have no need for more complex approaches to this task, because the questions in 20Q are always polar questions (i.e.\ questions eliciting yes/no answers, cf.\ \citealt{Huddleston1994}) and always syntactically quite limited.
 
-In the field of question generation (QG), one of the approaches to generating syntactically coherent questions is based on finding rules or templates. 
-In our project, we decided to follow a template-based approach
-This is because questions in 20Q are syntactically limited, so we do not need more complex approaches for this task.
-However, we will also outline a few rule-based approaches in this section and then motivate our choice for the template-based approach.
+Rule-based approaches tend to begin with a declarative sentence and then reformulate it into a question by applying rules to dependency structures in the sentence \citep[e.g.][]{KhullarEa2018, MhatreEa2019}, while template-based approaches essentially involve constructing a question frame with a placeholder variable \citep[e.g.][]{Zerr2014, Mandasari2019, FabbriEa2020}. 
+In what follows, we will briefly review both.
 
-Template-based methods for generating natural language questions essentially involve predefined pieces of text containing a placeholder variable which has to be replaced within the QG step itself \citep{Mandasari2019}. 
-One major criterion of such a question template is that it has to be suitable for a range of different words. 
-Accordingly, the approach of \citet{Mandasari2019}, for instance, exploits the idea of classifying sentences by combining Semantic Role Labelling with Part-of-Speech (POS) tagging and Named-Entity-Recognition (NER) to construct proper question templates. 
-Another approach to QG can be seen in work by \citet{Zerr2014} which makes use of POS tagging methods to construct questions. The author points out that QG heavily depends on semantic as well as syntactic accuracy. 
-Our 20Q implementation draws from work by \citet{Zerr2014} in which POS tags are obtained from a corpus and then matched to predefined question templates. \citet{FabbriEa2020} also investigate template-based techniques to convert sentences of a corpus into questions. 
-
-An interesting approach to rule-based QG is the work of \citet{MhatreEa2019}, which is based on keyword modelling using NER to generate questions from an input sequence. 
+One approach to rule-based QG is the work of \citet{MhatreEa2019}, which is based on keyword modelling using NER to generate questions from an input sequence. 
 Each input sentence is preprocessed and parsed to resolve anaphoric reference. 
 Thereafter, NER is used to identify the type of entity, which is important for the choice of \textit{wh}-component for the QG part of the model. 
 Depending on the output of the NER procedure, the appropriate \textit{wh}-pronoun is chosen. 
@@ -195,25 +189,25 @@ To construct this kind of question, the authors simply perform subject-auxiliary
 
 \citet{KhullarEa2018} concentrate on rule-based QG using relative pronouns to achieve high syntactic accuracy and semantic suitability. 
 Their system uses the spaCy dependency parser to evaluate the syntactic structure of sentences.%
-	\footnote{\url{https://spacy.io; accessed 14.08.2020.}
+	\footnote{\url{https://spacy.io}; accessed 14.08.2020.}
 Firstly, the input sentence is parsed to gain information about the presence of relative pronouns and about several linguistic features. 
 Afterwards, this information is input to one rule within a predefined rule set to create the questions. 
 The correct \textit{wh}-component is then determined according to these rules, resulting in a syntactically coherent question. 
 
+Note that these methods start with an input sentence, which is then dependency-parsed or analysed using NER.
+In our implementation, though, we are not starting with input sentences, but rather non-sentential units (namely, our features, which can be NPs like \textit{the ability to fly}, VPs like \textit{take breaths}, APs like \textit{active mainly at night}, and PPs like \textit{in a group}, to name a few).
+For this reason, a template-based method will be better-suited for our purposes.
+
+Template-based methods for generating natural language questions essentially involve predefined pieces of text containing a placeholder variable which has to be replaced within the QG step itself \citep{Mandasari2019}. 
+One major criterion of such a question template is that it has to be suitable for a range of different words. 
+Accordingly, the approach of \citet{Mandasari2019}, for instance, exploits the idea of classifying sentences by combining semantic role labelling with part of speech (POS) tagging and named entity recognition (NER) to construct proper question templates. 
+Another approach to QG can be seen in work by \citet{Zerr2014} which makes use of POS tagging methods to construct questions. 
+The author points out that QG heavily depends on semantic as well as syntactic accuracy. 
+Our 20Q implementation draws from work by \citet{Zerr2014} in which POS tags are obtained from a corpus and then matched to predefined question templates. 
+\citet{FabbriEa2020} also investigate template-based techniques to convert sentences of a corpus into questions. 
+
 All of the above-mentioned systems consist of a simple structure by using a POS tagger, dependency parser, or NER methods. 
-Several combinations of POS tagging, NER, and Semantic Role Labelling have been used in previous research to generate natural language questions. 
-By further elaborating on these approaches, we believe we were able to construct simple yet appropriate yes-no questions for our 20Q model (see Section \ref{subsec:qg} below). 
-
-% Integrate this discussion of polar questions better into the discussion.
-% Start out the section by saying "we're looking at polar questions". 
-% And then toward the end, mention that we're including tag questions. This current description in the last paragraph is really vague. Try to make it more concrete.
-
-20Q implementations typically make use of a specific question type, known as polar questions (i.e. yes/no questions). One subtype of polar questions is tag questions (TQs), which are interrogative constructions formed by a main clause (i.e. anchor), and a peripheral question tag (\citealt{Bawden2017, Bonsignori2007,TottieEa2006}), e.g. 
-\begin{gather*}
-    \underbrace{\text{``You are happy,}}_{\text{anchor}}\ \underbrace{\text{aren't you?"}}_{\text{question tag}}. 
-\end{gather*}
-
-With respect to polarity, TQs can be of various types: constant positive, constant negative, positive-negative and negative-positive. In our case, it is beneficial to not only work with regular polar questions but also TQs, given that in a discourse, they can have particular pragmatic power \citep{TottieEa2006}. Accordingly, we tried to exploit the TQ’s potential to create a clear bias towards a specific answer in our final implementation. 
+By adopting template-based QG using the POS-tagging approach, as will be discussed in Section \ref{subsec:qg} below, we believe we were able to construct simple yet appropriate yes-no questions for our 20Q model.
 
 % ==============================================
 \section{The knowledge base}
@@ -222,6 +216,7 @@ With respect to polarity, TQs can be of various types: constant positive, consta
 
 Our game uses a tabular knowledge base that, in its base form, contained 152 animals and 63 features for each object (though it is extended through gameplay; see Section \ref{subsec:out-of-db}).
 Each cell in the table is populated with a 1 or a 0 to indicate whether the given animal does or does not have the given feature. 
+An example is shown in Table \ref{tab:knowledge-base}.
 
 \begin{table}
 \centering
@@ -298,8 +293,8 @@ This naturally means that our system is less sophisticated than it could have be
 
 The first question to tackle was, ``How will the system decide which feature to ask about at each step?''
 Critically, our basic motivation was to choose the most informative feature at each step, so that we narrow down the potential animals most quickly.
-% TODO: REJIG FOLL SENT SO IT STARTS WITH 'MOST INFORMATIVE FEATURE'
-(We add some non-determinism later, so that it is not always the \textit{most} informative feature that is chosen at each step---this would make for boring gameplay---but first we focus on the basic mechanism for determining the informativity of a feature.)
+(If the most informative feature were always asked about first during the actual gameplay, the game would be boring and repetitive, so we add some non-determinism later to keep things interesting.
+Here, though, we focus first on the basic mechanism for determining the informativity of a feature.)
 
 We used a model in the style of a decision tree to tell us which feature is most informative at any given step.
 A decision tree is ``defined by recursively partitioning the input space, and defining a local model in each resulting region of input space'' \citep[545]{Murphy2012}.
@@ -360,6 +355,12 @@ However, since all animals with \havehair\ $= 0$ also have \produceeggs\ $= 1$, 
 This makes it unsuitable as a feature to distinguish animals, so it will not be asked about in subsequent rounds.
 (Even if two features are not perfectly correlated like these two are in this tiny knowledge base, after bisecting the data on one of them, the mixture of 0s and 1s in the other feature will be less even, so it will be less likely to be selected as a feature to ask about.)
 
+\begin{figure*}
+	\includegraphics[width=\linewidth]{graphics/updating.pdf}
+	\caption{Updating of probability scores across nine questions (only shown for a subset of 75 animals)}
+	\label{fig:bayesian-update}
+\end{figure*}
+
 % ==============================================
 \subsection{Guessing the animals}
 \label{subsec:guess-animals}
@@ -380,12 +381,6 @@ Specifically, we divide the current probability for each animal in half (also an
 Once the features have all been used up, we have a distribution of probability scores across animals that reflect how compatible they are with the user's answers.
 Figure \ref{fig:bayesian-update} illustrates how this distribution changes over the course of a game.
 
-\begin{figure*}
-	\includegraphics[width=\linewidth]{graphics/updating.pdf}
-	\caption{Updating of probability scores across nine questions (only shown for a subset of 75 animals)}
-	\label{fig:bayesian-update}
-\end{figure*}
-
 The animals that are perfectly compatible with everything the user has entered have the same probability score that they started with; those that are incompatible with only one answer have half of the prior score, and so on.
 At the end of the game, the system guesses the animals in decreasing order of probability.
 For the example shown in Figure \ref{fig:bayesian-update}, it would guess \texttt{polar bear} and \texttt{hippopotamus} (the only ones with a probability score of 20), followed by the animals with a probability score of 10, and so on.
@@ -395,26 +390,33 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 \label{subsec:qg}
 % ==============================================
 
+% TODO ELIZABETH: reformulate this entire section so it's more results-oriented
+
 Now that we know which features or animals to ask about when, we come to the front-facing part of the system where questions about these entities are generated.
+The QG section of this project consists of two sub-parts, namely
 
-% TODO ELIZABETH: reformulate this entire section so it's less process-oriented 
+\begin{enumerate}
+\item preprocessing the Switchboard Dialog Act Corpus (SwDA; \citealt{JurafskyEa1997,ShribergEa1998,StolckeEa2000}) to identify structures of polar questions,\footnote{The code used for preprocessing can be found here:  \url{https://github.com/epankratz/twenty-questions/blob/master/SWDA/swda_preprocessing.ipynb}.} and
+\item feature-to-question generation. 
+\end{enumerate}
 
-The question generation section of this project consists of two sub-parts, namely (i) the pre-processing of the Switchboard Dialog Act Corpus (SwDA; \citealt{JurafskyEa1997,ShribergEa1998,StolckeEa2000})\footnote{The code used for pre-processing can be found here:  \url{https://github.com/epankratz/twenty-questions/blob/master/SWDA/swda_preprocessing.ipynb}.} in order to analyze wordtype-related structures of polar questions and (ii) the actual feature-to-question generation part. 
-We decided to work with the SwDA to be able to investigate the different structures of polar questions and to use those as a reference point for the upcoming question generation part. Since the 20Q gameplay is based exclusively on the use of yes-no questions, we concentrated on extracting POS tags of questions marked by the tag \texttt{qy} in the SwDA. To perform pre-processing on the corpus, we first created a pandas dataframe containing the information that was needed for our purpose (question index, tag, text, and POS tags). Subsequently, we generated an additional column containing POS tags based on the spaCy library, which are easier to handle due to their simplified structure. 
-Table \ref{tab:swda_preprocessing} shows the first five rows of the final dataframe.
+We decided to work with the SwDA to be able to investigate the different structures of polar questions and to use those as a reference point for the questions we will generate.
+Since the 20Q gameplay is based exclusively on the use of polar questions, which correspond to the tag \texttt{qy} in the SwDA, we extracted questions marked by this tag.
+Then, we analyse the POS tags in these sentences, since the question templates we will use vary based on the POS of the variable element.
+Table \ref{tab:swda_preprocessing} shows some examples of the question from the SwDA, its POS tagging there, and the POS tags from spaCy, which we have chosen to work with because of their simplified structure.
 
-\begin{table*}[ht]
+\begin{table*}
 \centering
 \renewcommand{\arraystretch}{1.5}
 {\small
-\begin{tabularx}{\linewidth}{lcLLL} 
+\begin{tabularx}{\linewidth}{LLL} 
 	\toprule
-	Index & Tag & Text & POS & Spacy\_POS \\ \midrule
-	83 & \texttt{qy} & Were you -- & Were/VBD you/PRP --/: & \texttt{[`VERB', `PRON']}  \\
-	46 & \texttt{qy} & Are you in Texas?/ & Are/VBP you/PRP in/IN Texas/NNP ?/. & \texttt{[`VERB', `PRON', `ADP', `PROPN']} \\
-	29 & \texttt{qy} & I probably would |have done, \newline {D you know, } just… & I/PRP probably/RB would/MD have/VB done/VBN ,/... & \texttt{[`PRON', `ADV', `VERB', `VERB', `VERB', `NOUN'...]} \\
-	1 & \texttt{qy} & Are you a Vietnam veteran, Dudley? & Are/VBP you/PRP a/DT Vietnam/NNP veteran/NN ,/... & \texttt{[`VERB', `PRON', `DET', `PROPN', `NOUN', `PROP'...]} \\
-	5 & \texttt{qy} & Do you have family who were in the Vietnam War? & Do/VBP you/PRP have/VB  family/NN who/WP were/V... & \texttt{[`VERB', `PRON', `VERB', `NOUN', `PRON', `VERB'...]} \\
+	Text & POS & Spacy\_POS \\ \midrule
+	Were you -- & Were/VBD you/PRP --/: & \texttt{[`VERB', `PRON']}  \\
+	Are you in Texas?/ & Are/VBP you/PRP in/IN Texas/NNP ?/. & \texttt{[`VERB', `PRON', `ADP', `PROPN']} \\
+	I probably would |have done, \newline {D you know, } just… & I/PRP probably/RB would/MD have/VB done/VBN ,/... & \texttt{[`PRON', `ADV', `VERB', `VERB', `VERB', `NOUN'...]} \\
+	 Are you a Vietnam veteran, Dudley? & Are/VBP you/PRP a/DT Vietnam/NNP veteran/NN ,/... & \texttt{[`VERB', `PRON', `DET', `PROPN', `NOUN', `PROP'...]} \\
+	Do you have family who were in the Vietnam War? & Do/VBP you/PRP have/VB  family/NN who/WP were/V... & \texttt{[`VERB', `PRON', `VERB', `NOUN', `PRON', `VERB'...]} \\
 	\bottomrule
 \end{tabularx}
 }
@@ -422,8 +424,10 @@ Table \ref{tab:swda_preprocessing} shows the first five rows of the final datafr
 \label{tab:swda_preprocessing}
 \end{table*}
 
-Non-informative POS tags such as \texttt{PUNCT} (i.e. punctuation) and \texttt{SPACE} (i.e. blank spaces) were removed from the dataframe. In order to investigate the general structure of \texttt{qy} questions, we concentrated on the beginning of those sentences and created a dictionary consisting of the first five POS tags of each sentence and the frequency of each unique POS tag pattern. This gave us 1332 unique POS tag combinations, where the most frequent ones follow the structure $VERB \rightarrow{PRON} \rightarrow{VERB} \rightarrow{...} $ (see Table \ref{tab:pos_patterns}). Accordingly, for the 20Q gameplay we will generate questions such as: 
-``Does it have (a) tail?", ``Does it live in the ocean?", ``Is it big?". 
+The next step in the preprocessing was to remove uninformative POS tags such as \texttt{PUNCT} (punctuation) and \texttt{SPACE} (blank spaces).
+Then, in order to investigate the general structure of polar questions, we concentrated on the first five POS tags in each sentence and counted the frequency of each POS tag sequence.
+We ended up with 1332 unique POS tag sequences, the five most frequent of which are shown in Table \ref{tab:pos_patterns}.
+The most frequent one, \texttt{(VERB, PRON, VERB, DET, NOUN)}, would for example correspond to a question like ``Does it have a tail?''.
 
 \begin{table}
 \centering
@@ -443,45 +447,81 @@ Non-informative POS tags such as \texttt{PUNCT} (i.e. punctuation) and \texttt{S
 \label{tab:pos_patterns}
 \end{table}
 
-The purpose of \askaboutfeat \ is to print out a natural language question based on a given feature name. Thanks to the feedback we received in class about our project, we decided to also add biased questions (i.e.\ tag questions) as another type of question structure. In order to chose a biased or non-biased question, the arguments passed to this functions are (i) the feature name itself, (ii) a majority value which represents the majority value for a given feature (either 0 or 1), and (iii) an extremeness value which symbolizes how out-of-balanced the values for a given feature are. Depending on whether the value of extremeness reaches a certain threshold (in our case 0.65), a biased question is chosen over the non-biased version, since our model’s certainty about this value is high enough to ask a biased question. We initially considered implementing not only positive-anchored biased questions (i.e.\ 
-``Your animal \textit{is} big, isn’t it?"), but also negative-anchored biased questions (i.e. 
-``Your animal \textit{doesn't have} feathers, does it?"), but we realized that the latter elicit ambiguous responses which could negatively affect the functioning of our model because it might confuse the human player.
-For example, the answer ``Yes" to the question ``Your animal doesn’t have feathers, does it?" could either mean that the animal indeed has feathers or that it doesn’t have feathers at all.
+In addition to the structures that we gathered from the SwDA, we chose to add one further twist and incorporate a subtype of polar questions: tag questions.
+These are interrogative constructions formed by a main clause (i.e.\ anchor) and a peripheral question tag \citep{Bawden2017, Bonsignori2007, TottieEa2006}, e.g. 
+\begin{gather*}
+    \underbrace{\text{``You are happy,}}_{\text{anchor}}\ \underbrace{\text{aren't you?"}}_{\text{question tag}}. 
+\end{gather*}
 
-% TODO: make foll line into full sent 
+In a discourse, tag questions can have particular pragmatic power \citep{TottieEa2006}, and we are using them to indicate bias on the part of the 20Q player.
+If the system chooses a feature, it might expect that the user's answer of whether their animal has that feature will be ``yes'' if most of the values for that feature are 1.
+In that case, it might ask, say, ``Your animal is big, isn't it?'' with a tag question, rather than the neutral ``Is your animal big?''.
+
+For each feature, we compute an extremess value that symbolizes how out-of-balance the values for a given feature are.
+If the extremeness value exceeds a certain threshold (which we set at 0.65), a biased question is chosen over the non-biased version.
+
+We initially considered implementing not only positive-anchored biased questions, as in (\ref{ex:pos-tag}), but also negative-anchored biased questions, as in (\ref{ex:neg-tag}).
+
+\enumsentence{Your animal \textit{is} big, isn’t it?}\label{ex:pos-tag} 
+\vspace{-1.25\baselineskip}
+\enumsentence{Your animal \textit{doesn't have} feathers, does it?}\label{ex:neg-tag}
+
+This would have been possible,  but we realized that if negative-anchored biased questions like in (\ref{ex:neg-tag}) are answered affirmatively, ambiguities arise.
+For example, it is unclear whether the answer ``Yes" to the question ``Your animal doesn’t have feathers, does it?" means that the animal indeed has feathers or that it doesn’t have feathers at all.
+Being faced with negative-anchored biased questions like this might confuse the human player, which would negatively affect the functioning of our system.
+
+
+%With respect to polarity, TQs can be of various types: constant positive, constant negative, positive-negative and negative-positive. 
+%In our case, it is beneficial to not only work with regular polar questions but also TQs, given that in a discourse, they can have particular pragmatic power \citep{TottieEa2006}. 
+%Accordingly, we tried to exploit the TQ’s potential to create a clear bias towards a specific answer in our final implementation. 
+
+
+%The purpose of \askaboutfeat \ is to print out a natural language question based on a given feature name. 
+%Thanks to the feedback we received in class about our project, we decided to also add biased questions (i.e.\ tag questions) as another type of question structure. 
+%In order to chose a biased or non-biased question, the arguments passed to this functions are (i) the feature name itself, (ii) a majority value which represents the majority value for a given feature (either 0 or 1), and (iii) an extremeness value which symbolizes how out-of-balanced the values for a given feature are. 
+
+
 \noindent Question generation steps
 \begin{enumerate}
-  \item Pre-processing: For the question generation itself, we had to perform pre-processing on the feature names by replacing the underscores and partitioning the feature names consisting of multiple words into a 3-tuple that splits the first word from everything following it (i.e.\ \intheocean\  gives \texttt{("in", " ", "the ocean")}, and \havehair\  gives \texttt{("have", " ", "hair")}.
+  \item Pre-processing: For the question generation itself, we had to perform preprocessing on the feature names by replacing the underscores and partitioning the feature names consisting of multiple words into a 3-tuple that splits the first word from everything following it (i.e.\ \intheocean\  gives \texttt{("in", " ", "the ocean")}, and \havehair\  gives \texttt{("have", " ", "hair")}.
   \item Tokenization: The feature name has to be transformed into a sequence of tokens (i.e. spaCy doc) in order to be able to obtain POS tags in the next step. 
   \item POS-tagging: Obtain POS tag for the first word in the feature name using spaCy’s pos\_ method.
   \item Question Generation: Depending on the POS tag obtained in the previous step, choose one of the pre-defined question patterns (see Table  \ref{tab:question_patterns}). 
 \end{enumerate}
 
-The question patterns were created based on the results recorded in the pre-processing file of the SwDA Corpus. Constructing proper questions was especially challenging for feature names containing a verb, given that the verb had to be in the third person singular form in order make the question syntactically coherent. To access the third person singular form we made use of the \texttt{LemmInflect} library, a useful natural language processing library that provides all lexeme forms for a given word (in our case a verb) which can be used in combination with spaCy.%
+The question patterns were created based on the results recorded in the preprocessing file of the SwDA Corpus. 
+Constructing proper questions was especially challenging for feature names containing a verb, given that the verb had to be in the third person singular form in order make the question syntactically coherent. 
+To access the third person singular form we made use of the \texttt{LemmInflect} library, a useful natural language processing library that provides all lexeme forms for a given word (in our case a verb) which can be used in combination with spaCy.%
 	\footnote{\url{https://github.com/bjascob/LemmInflect}; accessed 14.08.2020.}
 This is exactly what we needed in order to generate proper questions for feature names containing a verb. 
 
 \begin{table*}[ht]
 \centering
-\begin{center}
-{\small \texttt{
-	\begin{tabularx}{\linewidth}{cLLLLL} 
+	\begin{tabularx}{\linewidth}{lLLLLL} 
 		\toprule
-		 & VERB (+ed), ADJ, ADV & NOUN (pl), DET, NUM & NOUN (sg) & VERB, AUX & ADP \\ \midrule
+		 & VERB(+ed), ADJ, ADV & NOUN (pl), DET, NUM & NOUN (sg) & VERB, AUX & ADP \\ \midrule
 		biased & `Your animal is \{feat\}, isn’t it?' & `Your animal has \{feat\}, doesn't it?' & `Your animal is a/an \{feat\}, isn't it?' & `Your animal \{feat\}, doesn't it?' & `Your animal lives \{feat\}, doesn't it?'  \\ 
 		non-biased & `Is your animal \{feat\}?' & `Does your animal have \{feat\}?' & `Is your animal a/an \{feat\}?' & `Does your animal \{feat\}?' & `Does your animal live \{feat\}?' \\
 		\bottomrule
 	\end{tabularx}
-}}
-\end{center}
 \caption{Question patterns based on bias status and POS tag}
 \label{tab:question_patterns}
 \end{table*}
 
 % FROM CONCLUSION: INTEGRATE
-Working with a big linguistic corpus like the SwDA and analyzing its question patterns was very interesting, particularly after our discussions in class. We were quite satisfied with the results of our template-based QG with POS-tagged features in the end, although we did face some challenges with POS-tagging during development. Namely, spaCy's POS tagger didn't correctly tag all of our features, resulting in some ungrammatical questions. We also tried WordNet’s \citep{Fellbaum2010} POS-tagger, which indeed gave different POS tags for the features, but still had bad accuracy with our feature names. These problems can be attributed to the fact that we used out-of-context tagging. Though we did re-test both POS-taggers in context and achieved good performance, we ultimately decided that the best method would be to simply rename the mis-tagged features such that they could be used to generate grammatical questions (e.g. changing "nocturnal" to "active mostly at night"). In addition to experimenting with the POS-taggers, we also tried performing NER on the feature names. Because our very first approach to the project was to divide features into sub-lists, spaCy's NER did not work on the out-of-context elements at all. 
+Working with a big linguistic corpus like the SwDA and analyzing its question patterns was very interesting, particularly after our discussions in class. 
+We were quite satisfied with the results of our template-based QG with POS-tagged features in the end, although we did face some challenges with POS-tagging during development. 
+Namely, spaCy's POS tagger didn't correctly tag all of our features, resulting in some ungrammatical questions.
+We also tried WordNet’s \citep{Fellbaum2010} POS-tagger, which indeed gave different POS tags for the features, but still had bad accuracy with our feature names. 
+These problems can be attributed to the fact that we used out-of-context tagging.
+Though we did re-test both POS-taggers in context and achieved good performance, we ultimately decided that the best method would be to simply rename the mis-tagged features such that they could be used to generate grammatical questions (e.g. changing "nocturnal" to "active mostly at night"). 
+In addition to experimenting with the POS-taggers, we also tried performing NER on the feature names. 
+Because our very first approach to the project was to divide features into sub-lists, spaCy's NER did not work on the out-of-context elements at all. 
 
-For future projects, it would be interesting to perform POS-tagging in combination with NER on in-context elements in consonance with \citet{Mandasari2019}, which seems like a promising approach that would yield correctly-analyzed named entities that could be fitted into question templates without further pre-processing. We would also be interested to try a rule-based approach for QG, by developing a question template composed of syntactic categories to be filled later on, or to work with a more complex linguistic architecture. However, we are satisfied with the implementation of our biased questions, since they convey the model's expectation as to what the user's answer will likely be, they give the 20Q player a more human, playful voice, and they introduce some variety to the question templates as a whole.
+For future projects, it would be interesting to perform POS-tagging in combination with NER on in-context elements in consonance with \citet{Mandasari2019}, which seems like a promising approach that would yield correctly-analyzed named entities that could be fitted into question templates without further preprocessing. 
+We would also be interested to try a rule-based approach for QG, by developing a question template composed of syntactic categories to be filled later on, or to work with a more complex linguistic architecture. 
+However, we are satisfied with the implementation of our biased questions, since they convey the model's expectation as to what the user's answer will likely be, they give the 20Q player a more human, playful voice, and they introduce some variety to the question templates as a whole.
+
 
 % ==============================================
 \subsection{Incorporating out-of-database objects}
