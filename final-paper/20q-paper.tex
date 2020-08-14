@@ -80,7 +80,10 @@ Matriculation number: 804865 \\
 \maketitle
 
 \begin{abstract}
-For our final project for the Question Processing seminar, we chose to develop a system that can play the game of 20 Questions and guess which animal a human player has in mind. We implemented a decision-tree-based system that splits our knowledge base along a feature, uses a template to generate a natural language question about that feature, records the user's input, and ultimately makes a guess as to the user's target animal. Users can add new animals to the knowledge base and missing features will be interpolated by one of two methods. Our game can be played in the command line and the 20Q system has won 40.4\% of the games it played, a number that is only expected to rise as the system logs more games.
+For our final project for the Question Processing course, we chose to develop a system that can play the game of 20 Questions and guess which animal a human player has in mind.
+We implemented a decision-tree-based system that splits our knowledge base along a feature, uses a template to generate a natural language question about that feature, records the user's input, and ultimately makes a guess as to the user's target animal from a probability distribution over all animals. 
+Users can add new animals to the knowledge base, and missing features will be interpolated by one of two methods. 
+Our game can be played in the command line and the 20Q system has won 40.4\% of the games it played, a number that is only expected to rise as the system logs more games.
 \end{abstract}
 
 % ==============================================
@@ -94,10 +97,10 @@ It will incorporate the answers it receives and ultimately make a guess about wh
 If the target object that the human player has in mind is not already in its knowledge base, the system will add it in based on the information the user has provided.
 
 This task is interesting and challenging.
-On the one hand, the project involves the computational-linguistic subtask of question generation (given a feature in the dataset, generate a natural-language question asking about that feature to display to the user), and on the other, the engineering subtask of manipulating the knowledge representation in accordance with the answers that the human player provides.
+On the one hand, it involves the computational-linguistic subtask of question generation (given a feature in the dataset, generate a natural-language question asking about that feature to display to the user), and on the other, the engineering subtask of manipulating the knowledge representation in accordance with the answers that the human player provides.
 For the latter, we will need to strategically select the best question to ask, incorporate the answers from the user as the game is played, and at the end, add previously-unseen objects into the knowledge base.
 
-We begin by outlining the previous work that inspired and informed various aspects of our approach in Section \ref{sec:litreview}.
+We begin by outlining the previous work in Section \ref{sec:litreview} that inspired and informed various aspects of our approach.
 Section \ref{sec:knowledge-base} discusses how we created the knowledge base that our 20Q player draws on, and in Section \ref{sec:impl} we turn to the implementation of the player itself.
 Section \ref{sec:eval} evaluates its performance, and Section \ref{sec:limit} discusses a few salient limitations of our system that would need to be improved if our system were to hold its own against any of the other more sophisticated 20Q players out there.
 
@@ -137,7 +140,7 @@ However, their approach is different insofar as they use an RL framework: they i
 Instead of using a knowledge graph, the model for selecting questions is based on RL procedures trying to find the optimal reward function. 
 \citet{HuEa2018} suggest a neural network which learns the immediate reward at each time step to improve the overall performance of the model, since only receiving a reward at the end of the game wouldn't allow the system to learn for each question.
 The model continually improved its win rate over time and was shown to be able to identify the target object within 14 questions.
-While this system clearly has excellent performance, incorporating RL into our project was not feasible; it is included in this literature review only for the sake of completeness.
+While this method clearly has excellent performance, incorporating RL into our project was not feasible for various reasons.
 
 Another approach that is too sophisticated for us, but nevertheless useful to know about, is the use of neural networks.
 For example, \citet{ReddyEa2017} propose the application of knowledge graphs to generate sets of question-answer pairs within a Recurrent Neural Network architecture by deriving triple relations from given entities. 
@@ -145,7 +148,7 @@ The triples are composed of a subject, an object (both represented as nodes in t
 The model consists of two units: the \textit{Question Keywords and Answer Extractor}, which directly selects necessary information about an object from the knowledge graph, and the \textit{Natural Language Question Generator}, which is used as an encoder and decoder of the object's representation. 
 Since this model has been able to outperform comparable approaches on question generation, it would represent the ``next step up'' from the question-generation methods we apply here.
 
-Perhaps the most widely-known implementation of the 20Q game is that of \citet{Burgener2006}, which can be found at \url{20q.net} (accessed 14.08.2020) and is also a popular toy. 
+Perhaps the most widely-known implementation of the 20Q game is that of \citet{Burgener2006}, which can be found at \url{20q.net} (accessed 14.08.2020) and which is also a popular toy. 
 With more than 88 million plays, Burgener's implementation has a precision rate of 80\% when it asks twenty questions, and 95\% for twenty-five questions. 
 The patent for the game describes the implementation of the deep artificial neural network, which is structured as a matrix of target objects by questions. 
 Each cell of the matrix contains an input-output connection weight, which defines the relationship between the questions/answers and the target objects. 
@@ -156,14 +159,14 @@ This is a primary motivation for Burgener's choice of architecture, as it allows
 As Burgener explains, it also allows the system to take into account cultural/demographic differences that may result in inconsistent answers about a given target object. 
 This is a consideration we should also be mindful of in our implementation, as our proposed model operates on the assumption that the user is providing truthful answers (and that inter-user agreement would be high). 
 The system of weights also allows for a more complex set of inputs than binary yes/no (e.g.\ sometimes, maybe, depends, rarely) where the degree of certainty of the answer is reflected in the weights used. 
-Our decision to include three answer choices---``yes'', ``no'', and ``unsure''---was inspired by this work, and although our final implementation did not offer as wide a range of possible inputs as \citet{Burgener2006}, expanding the range of answer choices of our current model is a potentially fruitful avenue for future work.
+Our decision to include three answer choices---``yes'', ``no'', and ``unknown''---was inspired by this work, and although our final implementation did not offer as wide a range of possible inputs as \citet{Burgener2006}, expanding the range of answer choices of our current model is a potentially fruitful avenue for future work.
 
 Finally, \citet{ToninEa2018} describe another artificial neural network implementation of the 20Q framework as part of a brain-computer interface to enable people with motor impairments to communicate. 
 The system uses a weight matrix to store the strength of the connection between target statements and questions (where negative weights indicate that the expected answer to the question is no, and vice-versa for positive weights). 
 After 15 questions, the model checks to see if there is only one target statement with a positive value. 
 If there is no single positive value after twenty questions, the network returns the statement with the highest current value. 
 When the network correctly estimates the target, the weight matrix is updated. 
-In addition to an interesting implementation, this paper also presents an intriguing example of how a 20Q implementation may have useful applications outside of the realm of games and entertainment.
+This paper is particularly interesting in that it also shows how a 20Q implementation may have useful applications outside of the realm of games and entertainment.
 
 % ==============================================
 \subsection{Template-based Question Generation}
@@ -171,7 +174,7 @@ In addition to an interesting implementation, this paper also presents an intrig
 % ==============================================
 
 We turn now to existing approaches to question generation (QG).
-The method that we will focus on in particular are rules- and template-based approaches, since this is what we will use in our implementation.
+The method that we will focus on in particular are rule- and template-based approaches, since this is what we will use in our implementation.
 We have no need for more complex approaches to this task, because the questions in 20Q are always polar questions (i.e.\ questions eliciting yes/no answers, cf.\ \citealt{Huddleston1994}) and always syntactically quite limited.
 
 Rule-based approaches tend to begin with a declarative sentence and then reformulate it into a question by applying rules to dependency structures in the sentence \citep[e.g.][]{KhullarEa2018, MhatreEa2019}, while template-based approaches essentially involve constructing a question frame with a placeholder variable \citep[e.g.][]{Zerr2014, Mandasari2019, FabbriEa2020}. 
@@ -195,16 +198,16 @@ Note that these methods start with an input sentence, which is then dependency-p
 In our implementation, though, we are not starting with input sentences, but rather non-sentential units (namely, our features, which can be NPs like \textit{the ability to fly}, VPs like \textit{take breaths}, APs like \textit{active mainly at night}, and PPs like \textit{in a group}, to name a few).
 For this reason, a template-based method will be better-suited for our purposes.
 
-Template-based methods for generating natural language questions essentially involve predefined pieces of text containing a placeholder variable which has to be replaced within the QG step itself \citep{Mandasari2019}. 
+Template-based methods for generating natural language questions involve predefined pieces of text containing a placeholder variable which has to be replaced within the QG step itself \citep{Mandasari2019}. 
 One major criterion of such a question template is that it has to be suitable for a range of different words. 
 Accordingly, the approach of \citet{Mandasari2019}, for instance, exploits the idea of classifying sentences by combining semantic role labelling with part of speech (POS) tagging and named entity recognition (NER) to construct proper question templates. 
-Another approach to QG can be seen in work by \citet{Zerr2014} which makes use of POS tagging methods to construct questions. 
+Another approach to QG can be seen in work by \citet{Zerr2014}, which makes use of POS-tagging methods to construct questions. 
 The author points out that QG heavily depends on semantic as well as syntactic accuracy. 
 Our 20Q implementation draws from work by \citet{Zerr2014} in which POS tags are obtained from a corpus and then matched to predefined question templates. 
-\citet{FabbriEa2020} also investigate template-based techniques to convert sentences of a corpus into questions. 
+\citet{FabbriEa2020} also investigate template-based techniques to convert sentences from a corpus into questions. 
 
 All of the above-mentioned systems consist of a simple structure by using a POS tagger, dependency parser, or NER methods. 
-By adopting template-based QG using the POS-tagging approach, as will be discussed in Section \ref{subsec:qg} below, we believe we were able to construct simple yet appropriate yes-no questions for our 20Q model.
+By adopting template-based QG using the POS-tagging approach, as will be discussed in Section \ref{subsec:qg} below, we believe we were able to construct simple yet appropriate polar questions for our 20Q model.
 
 % ==============================================
 \section{The knowledge base}
@@ -234,15 +237,15 @@ An example is shown in Table \ref{tab:knowledge-base}.
 \end{table}
 
 Our first implementation of the 20Q game made use of a knowledge base available on GitHub, which consists of 100 animals and 28 features for each.%
-	\footnote{\url{https://github.com/gibbsbravo/20_Questions/blob/master/knowledge_base.csv}; accessed 14.08.2020.}
+	\footnote{\url{https://github.com/gibbsbravo/20_Questions/blob/master/knowledge_base.csv}; \mbox{accessed 14.08.2020}.}
 However, this dataset alone is far from exhaustive and does not include many animals that would be likely to come up in a typical 20Q game, such as \textit{dog} or \textit{horse}. 
 In addition, while its 28 features provided a good jumping-off point, we wanted our system to have a wider range of features from which to choose when generating questions, which we believed would both improve the 20Q player's performance and make for more interesting and less repetitive gameplay. 
 
-To address this, we chose to concatenate the initial knowledge base and another dataset containing information about animal features.  We found the dataset ``Animals with Attributes 2'', developed by \citet{xian2017zero}, to be suitable for our purposes, as it contains 50 common animals and 85 features. Removing duplicate animals and features left us with a fairly sizeable set of animals, and after the manual addition of several missing animals that were deemed to be relatively likely targets, we ended up with the list of 152 objects for our model to draw from. 
+To address this, we chose to concatenate the initial knowledge base and another dataset containing information about animal features.  We found the dataset \textit{Animals with Attributes 2}, developed by \citet{xian2017zero}, to be suitable for our purposes, as it contains 50 common animals and 85 features. Removing duplicate animals and features left us with a fairly sizeable set of animals, and after the manual addition of several missing animals that were deemed to be relatively likely targets, we ended up with the list of 152 objects for our model to draw from. 
 
-In terms of choosing which features to include, we made use of a large portion of the existing features from the two base datasets and then further expanded the knowledge base by adding a number of features that were not in the datasets but might be asked about by a human 20Q guesser, such as \textit{Is it bigger than a microwave?} and \textit{Would you find it on a farm?}, to give two examples.
+In terms of choosing which features to include, we made use of a large portion of the existing features from the two base datasets, and then further expanded the knowledge base by adding a number of features that were not in the datasets but might be asked about by a human 20Q guesser, such as \textit{Is it bigger than a microwave?} and \textit{Would you find it on a farm?}, to give two examples.
 Features that applied to only a small number of animals were also added, as a way to distinguish alike animals or capture idiosyncratic or otherwise distinctive characteristics. 
-In addition, we removed a number of features that could be considered mutually exclusive (ostensibly, if an animal has 1 for the feature \texttt{predator}, it should have 0 for the feature \texttt{prey}) to avoid redundancy. 
+In addition, we removed a number of features that could be considered mutually exclusive to avoid redundancy (ostensibly, if an animal has 1 for the feature \texttt{predator}, it should have 0 for the feature \texttt{prey}). 
 We also removed features that we deemed confusing, unlikely to be common knowledge, or not particularly helpful for our purpose.
 
 \begin{table*}
@@ -253,7 +256,7 @@ We also removed features that we deemed confusing, unlikely to be common knowled
     \midrule
          objective &  \texttt{feathers}, \texttt{type\_of\_insect}, \texttt{horns\_or\_antlers} \\
          rather subjective & \texttt{on\_a\_farm}, \texttt{commonly\_eaten}, \texttt{bigger\_than\_a\_microwave} \\
-         subjective & \texttt{dangerous}, \texttt{useful\_to\_humans}, \texttt{sleep\_a\_lot}\\
+         subjective & \texttt{dangerous}, \texttt{smelly}, \texttt{sleep\_a\_lot}\\
     \bottomrule
     \end{tabular}
     \caption{Examples of objective, rather subjective, and subjective features in our knowledge base}
@@ -264,12 +267,13 @@ Having chosen all the animals and features that we wanted to include, we manuall
 We debated whether to incorporate some degree of uncertainty into the knowledge base to accommodate for the fact that different human players may have different knowledge or beliefs about the target animals. 
 (For instance, some players might consider spiders to be dangerous, whereas others may not.) 
 However, for reasons of both simplicity and practicality for our implementation, we decided to preserve the binary form of the data in the knowledge base; to the best of our knowledge, the knowledge base contains factual information about each feature (wherever possible). 
-We did, however, decide to manually group the features into three categories ranging from objective to subjective, with ``rather subjective'' as a middle ground, so that questions that would likely have high rates of inter-user agreement (the objective ones) can be posed before those that more prone to differences in opinion (the rather subjective or subjective ones). 
+Also, instances where the feature could be ambiguous, such as those related to color and size, were marked with 1 to capture the fact that the given feature \textit{could} be said to be true for the target.
+
+We did, however, decide to manually group the features into three categories ranging from objective to subjective, with ``rather subjective'' as a middle ground, so that questions that would likely have high rates of inter-user agreement (the objective ones) can be posed before those that are more prone to differences in opinion (the rather subjective or subjective ones). 
 Table \ref{tab:feature-types} shows examples of each of these feature types.
 
-Instances where the feature could be ambiguous, such as those related to color and size, were marked with 1 to capture the fact that the given feature \textit{could} be said to be true for the target.
 Lastly, since human players have the ability to add new animals to the knowledge base in our final implementation, our development knowledge base does not have to be exhaustive. 
-Over time, we hope that animals that are missing from our knowledge base will be added by players, ultimately resulting in a more comprehensive database from our system to draw from.
+Over time, we hope that animals that are missing from our knowledge base will be added by players, ultimately resulting in a more comprehensive database for our system to draw from.
 
 % ==============================================
 \section{Implementation}
@@ -280,7 +284,7 @@ In this section, we introduce our implementation of the 20Q gameplay.
 We opted to implement a relatively deterministic decision-tree-based 20Q system, rather than using a deep learning or RL paradigm.
 This was so that the inner workings of our system would remain transparent and everybody would be able to understand the code and work on improving it.
 For those of us with an exclusively linguistic background, such a deep dive into deep learning or RL felt like too much too soon.
-This naturally means that our system is less sophisticated than it could have been if we had used a more modern paradigm, but on the other hand, its inner workings are also much easier to understand (but see Section \ref{sec:limit} for some limitations of the chosen approaches).%
+This naturally means that our system is less sophisticated than it could have been if we had used a more modern paradigm, but on the other hand, its inner workings are also much easier to understand.%
     \footnote{All our code can be found on GitHub at \url{https://github.com/epankratz/twenty-questions}.}
 
 % ==============================================
@@ -304,12 +308,12 @@ In our task, though, each individual object equates to a class (i.e.\ we have an
 The structure of our data makes our problem a non-typical classification task, so a different method must be used.
 
 Instead of using the information gain measure itself, we use a stand-in: we orient ourselves around the size of the two partitions of the input space that result from splitting on a given feature, and we select the feature that produces the partitions that are closest to each other in size.
-To illustrate, say that we split on the first feature given in Table \ref{tab:knowledge-base} above, \havehair.
+To illustrate, say that we split on the feature \havehair.
 We would end up with one partition containing 65 animals that have no hair (i.e.\ where \havehair\ $= 0$), and another partition containing 87 animals with hair (i.e.\ where \havehair\ $= 1$).
 
 To see how even this split is, we take a ratio of these two numbers.
 We want this ratio to be as close to 1 as possible, since that would represent a perfect split of our input space in half: $\frac{50}{50} = 1$.
-This is because, since we only have two values for each feature (yes or no, 1 or 0), consistently splitting our input space in half results in the highest information gain \citep[cf.][]{Quinlan1986, Bishop2006}.
+We want an even split because, since we only have two values for each feature (yes or no, 1 or 0), consistently splitting our input space in half results in the highest information gain \citep[cf.][]{Quinlan1986, Bishop2006}.
 
 For illustration, looking at the feature \havehair\ in the full knowledge base, we have
 
@@ -336,12 +340,11 @@ To make for a more varied gameplay, we decided to randomly sample a feature to a
 This meant transforming the distribution over $f$ of $abs(1 - SCR(f))$ into a probability distribution, such that the features with the lowest $abs(1 - SCR(f))$ score would have the highest probability of being chosen at each step.
 This means that any reasonably informative features are reasonably probable candidates.
 
-To do this, we first transformed small values for $abs(1 - SCR(f))$, i.e.\ small distances from one, into large values, representing their greater probability of being chosen, by determining the maximum distance from one and subtracting every feature's distance from that (and adding one, so that the feature with that maximum distance value does not have a probability in the end of zero).
+To do this, we first transformed the $abs(1 - SCR(f))$ values into probabilities of the opposite magnitude (so that small distances from one have a high probability of being chosen) by determining the maximum distance from one and subtracting every feature's distance from that (and adding one, so that the feature with that maximum distance value does not have a probability in the end of zero).
 Then we scaled these transformed values into a probability distribution and sampled a feature from this distribution proportional to its probability.
 
 This method does have certain drawbacks (see Section \ref{sec:limit}), but in addition to its simplicity, it also comes with one further advantage.
-Even from the small subset of features shown in Table \ref{tab:knowledge-base}, it is apparent that the features are not independent.
-For example, if you know that an animal is a mammal, you probably also know that it has hair.
+Not all of the features in the knowledge base are independent; for example, if you know that an animal is a mammal, you probably also know that it has hair.
 So, an intelligent system should not ask about both of these features, since it should have gained the knowledge contained in both of them by asking about only one.
 And, indeed, because of the way we bisect the database based on the features that best distinguish the animals still contained in it, we automatically avoid asking about highly correlated features.
 
@@ -363,7 +366,7 @@ This makes it unsuitable as a feature to distinguish animals, so it will not be 
 % ==============================================
 
 Eventually, the gameplay will reach a point when the remaining animals in the pared-down knowledge base can no longer be distinguished by any of the features, since all the features will contain all 0s or all 1s.
-At this point, the game moves on to the stage of guessing the animals that the user may be thinking of.
+At this point, the game moves on to the stage of guessing individual animals.
 
 We were inspired by the approaches of \citet{DeyEa2019}, \citet{HuEa2018}, and \citet{Burgener2006}, who all maintain a probability distribution over outcomes that is updated over the course of the game based on the answers that the user provides.
 
@@ -387,8 +390,6 @@ For the example shown in Figure \ref{fig:bayesian-update}, it would guess \textt
 \label{subsec:qg}
 % ==============================================
 
-% TODO ELIZABETH: reformulate this entire section so it's more results-oriented
-
 Now that we know which features or animals to ask about when, we come to the front-facing part of the system where questions about these entities are generated.
 The QG section of this project consists of two sub-parts, namely
 
@@ -398,10 +399,11 @@ The QG section of this project consists of two sub-parts, namely
 \end{enumerate}
 
 We decided to work with the SwDA to be able to investigate the different structures of polar questions and to use those as a reference point for the questions we will generate.
+
 Since the 20Q gameplay is based exclusively on the use of polar questions, which correspond to the tag \texttt{qy} in the SwDA, we extracted questions marked by this tag.
-Then, we analyse the POS tags in these sentences, since the question templates we will use vary based on the POS of the variable element.
+Then, we analysed the POS tags in these sentences, since the question templates we will use are chosen based on the POS of the variable element.
 Table \ref{tab:swda_preprocessing} shows some examples of the question from the SwDA, its POS tagging there, and the POS tags from spaCy, which we have chosen to work with because of their simplified structure.%
-	\footnote{We also tried performing NER on the feature names using spaCy, but this did not work on the out-of-context elements at all.}
+	\footnote{We also tried performing NER on the feature names using spaCy, as an alternative to the POS tags, but this did not work on the out-of-context elements at all.}
 
 \begin{table*}
 \centering
@@ -446,7 +448,7 @@ The most frequent one, \texttt{(VERB, PRON, VERB, DET, NOUN)}, would for example
 \end{table}
 
 In addition to the structures that we gathered from the SwDA, we chose to add one further twist and incorporate a subtype of polar questions: tag questions.
-These are interrogative constructions formed by a main clause (i.e.\ anchor) and a peripheral question tag \citep{Bawden2017, Bonsignori2007, TottieEa2006}, e.g. 
+These are interrogative constructions formed by a main clause (i.e.\ anchor) and a peripheral question tag \citep{TottieEa2006, Bonsignori2007, Bawden2017}, e.g. 
 \begin{gather*}
     \underbrace{\text{``You are happy,}}_{\text{anchor}}\ \underbrace{\text{aren't you?''}}_{\text{question tag}}. 
 \end{gather*}
@@ -465,7 +467,7 @@ We initially considered implementing not only positive-anchored biased questions
 \vspace{-1.25\baselineskip}
 \enumsentence{Your animal \textit{doesn't have} feathers, does it?}\label{ex:neg-tag}
 
-This would have been possible, but we realized that if negative-anchored biased questions like in (\ref{ex:neg-tag}) are answered affirmatively, ambiguities arise.
+This would have been possible, but we realized that if negative-anchored biased questions like the one in (\ref{ex:neg-tag}) are answered affirmatively, ambiguities arise.
 For example, it is unclear whether the answer ``yes'' to the question ``Your animal doesn't have feathers, does it?'' means that the animal indeed has feathers or that it does not.
 Being faced with negative-anchored biased questions like this might confuse the human player, which would negatively affect the functioning of our system.
 Therefore we opted to only include positive-anchored biased questions.
@@ -497,16 +499,16 @@ Now that the templates are in place, the QG proceeds according to the following 
 \begin{enumerate}
   \item Preprocessing and tokenising the feature names, i.e.\ changing underscores to spaces and tokenising the string in a format that can be POS-tagged.
   \item POS-tagging of the first word in the feature string using spaCy's \texttt{pos\_} method.
-  \item Generating a question by choose one of the pre-defined question patterns depending on the extremeness value of the feature and the POS tag obtained in the previous step.
+  \item Generating a question by choosing one of the pre-defined question patterns depending on the extremeness value of the feature and the POS tag obtained in the previous step.
 \end{enumerate}
 
 We did face some challenges with Step 2 during development.
 Specifically, spaCy's POS tagger didn't correctly tag all of our features, resulting in some ungrammatical questions.
-For instance, it would only tag the feature \texttt{fly} as a noun, not a verb, and \texttt{nocturnal} as a proper noun, for some reason, and not an adjective.
+For instance, it would tag the feature \texttt{fly} only as a noun, not a verb, and \texttt{nocturnal} as a proper noun, for some reason, and not an adjective.
 We also tried WordNet's POS tagger \citep{Fellbaum2010}, but it still had poor accuracy with our feature names. 
 Presumably, these problems can be attributed to the fact that we used out-of-context tagging.
 
-We ultimately decided that the best solution would be to simply rename the mis-tagged features (e.g.\ changing \texttt{fly} to \texttt{the ability to fly}, giving ``Does your animal have the ability to fly?'', and \texttt{nocturnal} to \texttt{active mainly at night}, giving ``Is your animal active mainly at night?'').
+We ultimately decided that the best solution would be to simply rename the mis-tagged features (e.g.\ changing \texttt{fly} to \texttt{the\_ability\_to\_fly}, giving ``Does your animal have the ability to fly?'', and \texttt{nocturnal} to \texttt{active\_mainly\_at\_night}, giving ``Is your animal active mainly at night?'').
 
 % ==============================================
 \subsection{Incorporating out-of-database objects}
@@ -514,12 +516,12 @@ We ultimately decided that the best solution would be to simply rename the mis-t
 % ==============================================
 
 Before concluding the implementation section, we turn to our last challenge: successfully incorporating out-of-database objects into our knowledge base. 
-We adopted a strategy inspired by the following quote:
+We adopted a strategy inspired by the following quote from \citet[29]{Rosch1978}:
 
 \begin{displayquote}
 The perceived world is not an unstructured total set of equiprobable co-occurring attributes. 
 Rather, the material objects of the world are perceived to possess ...\ high correlational structure.
-That is, given a knower who perceives the complex attributes of feathers, fur, and wings, it is an empirical fact provided by the perceived world that wings co-occur with feathers more than with fur. \citep[29]{Rosch1978}
+That is, given a knower who perceives the complex attributes of feathers, fur, and wings, it is an empirical fact provided by the perceived world that wings co-occur with feathers more than with fur. 
 \end{displayquote}
 
 Following this logic, for animals that are not in our knowledge base, we can exploit the correlations between similar animals to expand our knowledge base and improve the system over time.
@@ -528,16 +530,17 @@ If said animal is not already in the knowledge base, a new entry will be created
 The system can gather at most 20 features for each animal, since it can ask at most 20 questions, which means that it will need to fill in the 43 or more empty fields in the new entry itself.
 This is where the interpolation of unknown features comes in.
 
-To fill in these empty values, we decided to work with two correlation methods. 
+%To fill in these empty values, we decided to work with two correlation methods. 
 Our goal was to find the most highly correlated animal to the out-of-database target (given the user's input) and subsequently populate the empty fields with the values from the highly-correlated animal's entry in the knowledge base. 
 For example, given \textit{coyote} as an out-of-database object, one would expect it to have many shared features with an animal like \textit{wolf}. 
-Our aim in these similarity measures is to find the existing animal in the knowledge base that most closely matches the user's input and therefore is likely a similar animal.
+Our aim in implementing similarity measures is to find the existing animal in the knowledge base that most closely matches the user's input and therefore is likely a similar animal.
 
-When initializing the 20Q game, the human user is given the option of specifying which correlation method to be used to interpolate any out-of-database objects. We will discuss the two methods in detail in the present section.
-
-The first correlation method takes \citeauthor{Rosch1978}'s \citeyearpar{Rosch1978} words to heart, tallying the total number of features that a pair of animals has in common. Although this method is very simple, it often generates similar animals that are very close to human intuitions. We called this method \texttt{OURS}. 
+When initializing the 20Q game, the human user is given the option of specifying which of two correlation methods is to be used to interpolate any out-of-database objects. 
+The first correlation method takes \citeauthor{Rosch1978}'s \citeyearpar{Rosch1978} words to heart, tallying the total number of features that a pair of animals has in common. 
+%Although this method is very simple, it often generates similar animals that are very close to human intuitions (see the evaluation in Section \ref{subsec:eval-interpolation}). 
+We called this method \texttt{OURS}. 
 The second method, which we called \texttt{CORR}, computes a pairwise Pearson correlation coefficient between the out-of-database animal and each remaining animal. 
-The performance of these two methods are evaluated in Section \ref{subsec:eval-interpolation} below.
+The performance of both of these methods is evaluated in Section \ref{subsec:eval-interpolation} below.
 
 \begin{figure*}[htbp!]
 \centering
@@ -549,13 +552,14 @@ The performance of these two methods are evaluated in Section \ref{subsec:eval-i
 Having discussed our strategy for handling cases in which the target animal is not in the knowledge base, we turn now to our strategy for games that were lost by the 20Q player but for which the target animal was, in fact, in the knowledge base. 
 In these instances, we still add a new row for the animal to preserve the human player's answers, but instead of using a correlation method, we fill the empty cells with the values from the animal's existing row in the knowledge base. 
 The result is two entries for the given animal in the knowledge base, one with the newly-acquired human judgments and another with more factual information. 
+
 As we discussed in class, 20Q is a game in which it's more interesting to note what the players \textit{think} about animals, even if this deviates from what is actually true. 
 In this way we are able to capture both the objective information and more subjective, human judgment. 
 In order to prevent the system from guessing the same target animal more than once in a single game, we implemented a check in the gameplay code to ensure that each animal name could only be guessed one time (only the highest-probability instance of each animal is guessed).  
 
-\vspace{\baselineskip}
+\pagebreak
 
-\noindent The call graph in Figure \ref{fig:call-graph} provides a visual summary of how the (non-utility) methods in the \texttt{TwentyQuestions} class fit together.
+\noindent In sum, the call graph in Figure \ref{fig:call-graph} provides a visual summary of how the (non-utility) methods in the \texttt{TwentyQuestions} class fit together.
 
 % ==============================================
 \section{Evaluation}
@@ -584,6 +588,8 @@ Interestingly, even if the system managed to guess an out-of-database animal for
 We speculate that this may be due to the interaction of our random question selection and our interpolation measures. 
 It could be the case that the human player's answers are incompatible with the interpolated data, and thus the probability distribution would be biased away from the correct target animal. 
 However, after a significant number of plays, we expect that the system would be able to gain enough information to improve its win rate for these items as well.
+
+\pagebreak
 
 At the time of writing, our model had logged 94 total plays. 
 Although this is not a large number from a statistical standpoint, it is enough to allow us to do some analysis and assess how the model might be expected to improve over time. 
@@ -630,7 +636,7 @@ Running both methods on the now-out-of-database animal, we generated the top fiv
 Two of the most interesting results can be found in Tables \ref{tab:corr1} and \ref{tab:corr2}.
 For the pair (\textit{dog}, \textit{German shepherd}) in Table \ref{tab:corr1}, the \texttt{OURS} method returned animals that match quite nicely with human intuition, performing far better than the \texttt{CORR} method, which returned animals that are very different both from \textit{dog} and from each other.%
     \footnote{In the Jupyter Notebook, \textit{deer} is given as number 5 for \texttt{CORR}.
-    \textit{dog} is substituted here for illustrative purposes because it received the same score, but appears lower alphabetically.}
+    \textit{dog} it received the same score, but appears lower alphabetically, and it is substituted here for illustrative purposes.}
 We speculate that this may be due to the overly general nature of the object \textit{dog}, which, given our decision to assign 1s to features for which one might answer with either yes or no, as we discussed in Section \ref{sec:knowledge-base}, shares features with a wide range of different animals.
 
 However, turning to the pair (\textit{chimpanzee}, \textit{monkey}) in Table \ref{tab:corr2}, we see that both correlation measures returned the same animals in the same order. 
@@ -680,6 +686,7 @@ Our goal is to see how close the system's interpolations are to the true values 
 For \texttt{OURS}, the mean accuracy rate of the interpolation across all animals was 82.1\%, i.e.\ the system interpolated the correct value in 82.1\% of cases.
 And for \texttt{CORR}, the mean accuracy rate of the interpolation was 77\%.
 
+For each game, a different number of features was asked about.
 Figure \ref{fig:interp-eval} suggests a weakly positive correlation between the number of features that were asked about and the accuracy of the interpolations, which makes sense.
 The more features that the user provides, the more information the system can use to make an educated guess about the remaining features.
 
@@ -701,7 +708,7 @@ The more features that the user provides, the more information the system can us
 % ==============================================
 
 There are several aspects of our system that could be improved upon in future work. 
-Although we did implement some strategies to better handle games with so-called ``noisy input'', in which a user's answers did not exactly match the entry for the target animal in our knowledge base (for instance, accepting ``unknown'' as an answer, ranking features by their relative objectivity, and the probability distribution, as discussed above), our model's performance in such cases still has room for improvement. 
+Although we did implement some strategies to better handle games with so-called ``noisy input'', in which a user's answers did not exactly match the entry for the target animal in our knowledge base (for instance, accepting ``unknown'' as an answer, ranking features by their relative objectivity, and the probability distribution over all animals, as discussed above), our model's performance in such cases still has room for improvement. 
 
 Our feature selection method is such that the game may not be asking questions that will lead to the correct animal being guessed. 
 Because the feature selection method chooses the best feature for the remaining partition of the knowledge base, if the target animal is not in that partition (i.e.\ if the user's input was incompatible with the knowledge base's representation of that animal), the system's questions are biased away from the target animal. 
@@ -709,21 +716,23 @@ The probability score distribution across animals is a strategy we implemented t
 
 Another limitation of our system, as alluded to in Section \ref{sec:litreview}, is the set of answer inputs available to the human player. 
 While the current iteration of our 20Q game only allows for inputs of 0, 1, and 2 for ``no'', ``yes'', and ``unknown'', respectively, an avenue for future work would be to incorporate a wider range of answer choices, as in \citet{Burgener2006}'s implementation. 
-Adding inputs that are less black and white than a binary split (for instance, ``I think so'', ``I don't think so'', ``sometimes'', or ``it's possible'') would make the game easier to play and positively impact the probability distribution, perhaps leading to a higher win rate. 
+Adding inputs that are less black and white than this binary split (for instance, ``I think so'', ``I don't think so'', ``sometimes'', or ``it's possible'') would make the game easier to play and positively impact the probability distribution, perhaps leading to a higher win rate. 
 
 Admittedly, our feature selection system does not learn to ask better questions over time; the method of choosing the best feature to ask about at a given time does not follow a strategy that extends beyond each individual turn. We chose to focus our efforts on other parts of the project instead, since the current strategy already works fairly well.
-
-If we were to develop the system further, though, this would certainly be a point of improvement, e.g. by learning from previous games which sequences of questions tend to perform well. This approach would also ostensibly rectify another limitation of our system, namely that questions that should be mutually exclusive: if a user answers ``yes'' to the question ``Does it have four legs?'', the system need not subsequently ask if the animal has two legs. 
+If we were to develop the system further, though, this would certainly be a point of improvement, e.g.\ by learning from previous games which sequences of questions tend to perform well.
+This approach would also potentially rectify another limitation of our system, namely that questions that should be mutually exclusive: if a user answers ``yes'' to the question ``Does it have four legs?'', the system need not subsequently ask if the animal has two legs. 
 
 Another potential point of improvement concerns the questions we generated.
 For future projects, it would be interesting to perform POS-tagging in combination with NER on in-context elements in consonance with \citet{Mandasari2019}, which seems like a promising approach that would yield correctly-analyzed named entities that could be fitted into question templates without further preprocessing. 
 We would also be interested to try a rule-based approach for QG, by developing a question template composed of syntactic categories to be filled later on, or to work with a more complex linguistic architecture. 
 
 Recall also from Section \ref{sec:knowledge-base} that instances where the feature could be ambiguous, such as those related to color and size, were marked with 1 to capture the fact that the given feature \textit{could} be said to be true for the target.
-Future iterations might modify the question template for this subset of features to reflect this sense of possibility or uncertainty.
+Future iterations might modify the question template for this subset of features to reflect this sense of possibility or uncertainty, e.g.\ to something along the lines of ``Could your animal be black?''.
 
-Finally, our interpolation measures could be more sophisticated. While our measures perform relatively well, as discussed in section \ref{subsec:out-of-db}, our system could be improved by adopting an interpolation method that could take into account feature data for more than one animal. 
+Finally, our interpolation measures could be more sophisticated. 
+While our measures perform relatively well, as shown in Section \ref{subsec:out-of-db}, our system could be improved by adopting an interpolation method that could take into account feature data for more than one animal. 
 Another approach could focus more on the features themselves than the animal, giving relative likelihoods of one feature given another.
+
 Furthermore, since the interpolation tends to match the gold standard more closely when more questions have been asked, we could engineer the system to recognise that it will probably not guess the user's animal and, in that case, to ask as many probing questions as possible, to get more information that will improve the quality of its guessing.
 
 % ==============================================
@@ -731,7 +740,8 @@ Furthermore, since the interpolation tends to match the gold standard more close
 \label{sec:concl}
 % ==============================================
 
-Our fairly humble 20Q system may not hold its own against the top players on the market, but in working on this project we have taken on tasks that are both engineering-oriented and linguistic in nature and have learned a lot about question generation, manipulation of knowledge bases according to the provided answers, and (not least) how to work in a team. 
+Our fairly humble 20Q system may not hold its own against the top players on the market, but in working on this project we have taken on tasks that are both engineering-oriented and linguistic in nature.
+This has taught us a lot about question generation, manipulation of knowledge bases according to the provided answers, and (certainly not least) how to work in a team. 
 
 % ==============================================
 
