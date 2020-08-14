@@ -42,3 +42,8 @@ To play on the command line, start up your interactive Python shell, and then ex
 To play more than once, you can re-run `TQ.game.play()` as many times as you'd like.
 
 (Importing the module will take a few seconds while all the libraries are loaded, but then the fun can begin!)
+
+## Looking a bit deeper
+
+If you want to look more closely at the class and its methods, see `code/20q-playground.ipynb`.
+That notebook already contains some examples showcasing the question generation method for various features (and you can even add in your own feature and see what happens!).
