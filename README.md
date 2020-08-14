@@ -31,7 +31,7 @@ Begin by cloning this repository.
 git clone https://github.com/epankratz/twenty-questions
 ```
 
-Now, navigate into the directory `twenty-questions/code/`.
+Now, navigate into the directory `code/`.
 To play on the command line, start up your interactive Python shell, and then execute the following commands.
 
 ```
